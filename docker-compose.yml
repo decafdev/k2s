@@ -1,0 +1,10 @@
+version: "3"
+
+services:
+  nats:
+    container_name: nats
+    image: "nats"
+    # volumes: [./nats/:/etc/nats]
+    # command: "-js -c /etc/nats/server.conf"
+    command: "-js"
+    ports: ["4222:4222", "6222:6222"]

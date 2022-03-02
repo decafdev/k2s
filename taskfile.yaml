@@ -1,0 +1,69 @@
+# documentation for tasks can be found here https://github.com/techdecaf/tasks
+options:
+  log: true
+
+variables:
+  CI_PROJECT_NAME: "{{PWD | base}}"
+  CI_COMMIT_TAG: "{{TRY `git describe --tags --always --dirty --abbrev=0`}}"
+  CI_COMMIT_REF_NAME: "{{TRY `git rev-parse --abbrev-ref HEAD`}}"
+  CI_COMMIT_SHA: "{{TRY `git rev-parse HEAD`}}"
+
+  PRIVATE_REGISTRY_ENABLED: "true"
+  PRIVATE_REGISTRY_USER: "user.name"
+  PRIVATE_REGISTRY_PASS: "user.password"
+
+tasks:
+  default:
+    description: runs when no tasks have been specified.
+    commands: [tasks list]
+
+  buff-lint:
+    dir: "protobuf"
+    command: [buf lint]
+
+  buff-build:
+    dir: "protobuf"
+    command: [buf build]
+
+  dev:
+    description: starts service in watch mode
+    variables:
+      LOGGER_PRETTY_PRINT: "true"
+    commands: ["air"]
+
+  clean:
+    description: remove temporary files or directories
+    commands: ["rm -rf build tmp temp"]
+
+  dependencies:
+    description: install all required dependencies
+    commands: [go get, go install]
+
+  docs:
+    description: generate swagger documentation
+    commands: ["swag init -g main.go --output docs"]
+
+  test:
+    description: run tests
+    commands: [go test -failfast -v ./...]
+
+  coverage:
+    description: run test including coverage
+    commands: [go test -failfast -v -coverprofile=coverage.out ./...]
+
+  build:
+    description: compile window, linux, osx x64
+    variables:
+      GOARCH: amd64
+      flags: -X main.VERSION={{.CI_COMMIT_TAG}} main.SERVICE_NAME={{.CI_PROJECT_NAME}}
+    commands:
+      - GOOS=darwin go build -ldflags "{{.flags}}" -o build/darwin/{{.CI_PROJECT_NAME}} -v
+      - GOOS=linux go build -ldflags "{{.flags}}" -o build/linux/{{.CI_PROJECT_NAME}} -v
+
+  deploy:
+    description: deploy the current project
+    commands: []
+
+  upgrade:
+    description: upgrade the current project
+    commands: []

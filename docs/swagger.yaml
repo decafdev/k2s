@@ -1,0 +1,155 @@
+basePath: /
+definitions:
+  healthz.HealthDTO:
+    properties:
+      hostname:
+        example: api.my-app.com
+        type: string
+      name:
+        example: my-app
+        type: string
+      version:
+        example: 1.0.1
+        type: string
+    type: object
+  registries.CreateRegistryDTO:
+    properties:
+      name:
+        example: docker-hub
+        type: string
+      password:
+        example: my-password
+        type: string
+      registry:
+        example: https://registry.docker.io
+        type: string
+      username:
+        example: my-user
+        type: string
+    required:
+    - name
+    - password
+    - registry
+    - username
+    type: object
+  registries.PrivateRegistryDTO:
+    properties:
+      labels:
+        additionalProperties:
+          type: string
+        type: object
+      name:
+        example: docker-hub
+        type: string
+      namespace:
+        example: k2s-operator
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: staggeringly simple and opinionated kubernetes deployments
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: k2s operator
+  version: "2.0"
+paths:
+  /healthz:
+    get:
+      consumes:
+      - application/json
+      description: healthz
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/healthz.HealthDTO'
+      summary: healthz
+  /registries:
+    get:
+      consumes:
+      - application/json
+      description: list managed docker registry secrets
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/registries.PrivateRegistryDTO'
+            type: array
+      summary: list managed docker registry secrets
+    put:
+      consumes:
+      - application/json
+      description: Create a name managed docker registry secret
+      parameters:
+      - description: create registry request body
+        in: body
+        name: CreateRegistryDTO
+        required: true
+        schema:
+          $ref: '#/definitions/registries.CreateRegistryDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Create a name managed docker registry secret
+  /registries/:name:
+    get:
+      consumes:
+      - application/json
+      description: get managed docker registry secret by name
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/registries.PrivateRegistryDTO'
+      summary: get managed docker registry secret by name
+  /registries/:name/copy-to/:namespace:
+    put:
+      consumes:
+      - application/json
+      description: copy a managed docker registry secret from the k2s namespace to
+        another namespace
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/registries.PrivateRegistryDTO'
+      summary: copy a managed docker registry secret from the k2s namespace to another
+        namespace
+  /traefik/config:
+    get:
+      consumes:
+      - application/json
+      description: returns traefik config file information
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: returns traefik config file information
+schemes:
+- http
+swagger: "2.0"

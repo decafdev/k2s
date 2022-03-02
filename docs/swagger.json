@@ -1,0 +1,226 @@
+{
+    "schemes": [
+        "http"
+    ],
+    "swagger": "2.0",
+    "info": {
+        "description": "staggeringly simple and opinionated kubernetes deployments",
+        "title": "k2s operator",
+        "termsOfService": "http://swagger.io/terms/",
+        "contact": {
+            "name": "API Support",
+            "url": "http://www.swagger.io/support",
+            "email": "support@swagger.io"
+        },
+        "license": {
+            "name": "Apache 2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+        },
+        "version": "2.0"
+    },
+    "host": "localhost:8080",
+    "basePath": "/",
+    "paths": {
+        "/healthz": {
+            "get": {
+                "description": "healthz",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "healthz",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/healthz.HealthDTO"
+                        }
+                    }
+                }
+            }
+        },
+        "/registries": {
+            "get": {
+                "description": "list managed docker registry secrets",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "list managed docker registry secrets",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/registries.PrivateRegistryDTO"
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Create a name managed docker registry secret",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Create a name managed docker registry secret",
+                "parameters": [
+                    {
+                        "description": "create registry request body",
+                        "name": "CreateRegistryDTO",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/registries.CreateRegistryDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/registries/:name": {
+            "get": {
+                "description": "get managed docker registry secret by name",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "get managed docker registry secret by name",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/registries.PrivateRegistryDTO"
+                        }
+                    }
+                }
+            }
+        },
+        "/registries/:name/copy-to/:namespace": {
+            "put": {
+                "description": "copy a managed docker registry secret from the k2s namespace to another namespace",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "copy a managed docker registry secret from the k2s namespace to another namespace",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/registries.PrivateRegistryDTO"
+                        }
+                    }
+                }
+            }
+        },
+        "/traefik/config": {
+            "get": {
+                "description": "returns traefik config file information",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "returns traefik config file information",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "healthz.HealthDTO": {
+            "type": "object",
+            "properties": {
+                "hostname": {
+                    "type": "string",
+                    "example": "api.my-app.com"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "my-app"
+                },
+                "version": {
+                    "type": "string",
+                    "example": "1.0.1"
+                }
+            }
+        },
+        "registries.CreateRegistryDTO": {
+            "type": "object",
+            "required": [
+                "name",
+                "password",
+                "registry",
+                "username"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "example": "docker-hub"
+                },
+                "password": {
+                    "type": "string",
+                    "example": "my-password"
+                },
+                "registry": {
+                    "type": "string",
+                    "example": "https://registry.docker.io"
+                },
+                "username": {
+                    "type": "string",
+                    "example": "my-user"
+                }
+            }
+        },
+        "registries.PrivateRegistryDTO": {
+            "type": "object",
+            "properties": {
+                "labels": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "name": {
+                    "type": "string",
+                    "example": "docker-hub"
+                },
+                "namespace": {
+                    "type": "string",
+                    "example": "k2s-operator"
+                }
+            }
+        }
+    }
+}

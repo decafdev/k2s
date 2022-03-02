@@ -1,0 +1,126 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  creationTimestamp: null
+  labels:
+    app.kubernetes.io/name: whoami
+  name: whoami-v1
+spec: {}
+status: {}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  creationTimestamp: null
+  labels:
+    app.kubernetes.io/name: whoami
+  name: whoami.1.7.1
+  namespace: whoami-v1
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    traefik.ingress.kubernetes.io/router.middlewares: rewrite-url@file
+  creationTimestamp: null
+  labels:
+    app.kubernetes.io/name: whoami
+  name: whoami
+  namespace: whoami-v1
+spec:
+  rules:
+  - http:
+      paths:
+      - backend:
+          service:
+            name: whoami
+            port:
+              number: 80
+        path: /whoami/v1/
+        pathType: Prefix
+status:
+  loadBalancer: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: null
+  labels:
+    app.kubernetes.io/name: whoami
+  name: whoami
+  namespace: whoami-v1
+spec:
+  ports:
+  - name: http
+    port: 80
+    protocol: TCP
+    targetPort: 0
+  selector:
+    app.kubernetes.io/name: whoami
+  type: ClusterIP
+status:
+  loadBalancer: {}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app.kubernetes.io/name: whoami
+  name: whoami
+  namespace: whoami-v1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: whoami
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+    type: RollingUpdate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app.kubernetes.io/name: whoami
+      name: whoami
+      namespace: whoami-v1
+    spec:
+      containers:
+      - envFrom:
+        - secretRef:
+            name: whoami.1.7.1
+        image: traefik/whoami:v1.7.1
+        livenessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /healthz
+            port: 80
+            scheme: HTTP
+          periodSeconds: 30
+          successThreshold: 1
+          timeoutSeconds: 1
+        name: whoami
+        ports:
+        - containerPort: 80
+          name: http
+          protocol: TCP
+        readinessProbe:
+          failureThreshold: 2
+          httpGet:
+            path: /healthz
+            port: 80
+            scheme: HTTP
+          periodSeconds: 30
+          successThreshold: 1
+          timeoutSeconds: 1
+        resources:
+          limits:
+            cpu: 250m
+            memory: 64M
+          requests:
+            cpu: 25m
+            memory: 8M
+status: {}
