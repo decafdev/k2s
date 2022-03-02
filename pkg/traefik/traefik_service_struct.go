@@ -6,6 +6,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/techdecaf/k2s/v2/pkg/config"
 	"github.com/techdecaf/k2s/v2/pkg/kube"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 )
 
 var test = []byte(`
@@ -65,35 +66,35 @@ func (t *TraefikService) OnModuleInit() error {
 		return err
 	}
 
-	resources, err := NewTraefikResources(options, &TraefikConfig{})
+	traefik, err := NewTraefikResources(options, &TraefikConfig{})
 
-	// t.log.Info("deploying traefik.service-account")
-	// if _, err = t.k8s.ApplyServiceAccount(options.Namespace, resources.ServiceAccount); err != nil {
-	// 	return err
-	// }
+	t.log.Info("deploying traefik.service-account")
+	if _, err = t.k8s.CreateServiceAccount(options.Namespace, traefik.ServiceAccount); !apierrors.IsAlreadyExists(err) {
+		return err
+	}
 
 	t.log.Info("deploying traefik.cluster-role")
-	if _, err = t.k8s.ApplyClusterRole(resources.ClusterRole); err != nil {
+	if _, err = t.k8s.ApplyClusterRole(traefik.ClusterRole); err != nil {
 		return err
 	}
 
 	t.log.Info("deploying traefik.cluster-role-binding")
-	if _, err = t.k8s.ApplyClusterRoleBinding(resources.ClusterRoleBinding); err != nil {
+	if _, err = t.k8s.ApplyClusterRoleBinding(traefik.ClusterRoleBinding); err != nil {
 		return err
 	}
 
 	t.log.Info("deploying traefik.service")
-	if _, err = t.k8s.ApplyService(options.Namespace, resources.Service); err != nil {
+	if _, err = t.k8s.ApplyService(options.Namespace, traefik.Service); err != nil {
 		return err
 	}
 
 	t.log.Info("deploying traefik.configmap")
-	if _, err = t.k8s.ApplyConfigMap(options.Namespace, resources.ConfigMap); err != nil {
+	if _, err = t.k8s.ApplyConfigMap(options.Namespace, traefik.ConfigMap); err != nil {
 		return err
 	}
 
 	t.log.Info("deploying traefik.deployment")
-	if _, err = t.k8s.ApplyDeployment(options.Namespace, resources.Deployment); err != nil {
+	if _, err = t.k8s.ApplyDeployment(options.Namespace, traefik.Deployment); err != nil {
 		return err
 	}
 
