@@ -67,10 +67,10 @@ func (t *TraefikService) OnModuleInit() error {
 
 	resources, err := NewTraefikResources(options, &TraefikConfig{})
 
-	t.log.Info("deploying traefik.service-account")
-	if _, err = t.k8s.ApplyServiceAccount(options.Namespace, resources.ServiceAccount); err != nil {
-		return err
-	}
+	// t.log.Info("deploying traefik.service-account")
+	// if _, err = t.k8s.ApplyServiceAccount(options.Namespace, resources.ServiceAccount); err != nil {
+	// 	return err
+	// }
 
 	t.log.Info("deploying traefik.cluster-role")
 	if _, err = t.k8s.ApplyClusterRole(resources.ClusterRole); err != nil {

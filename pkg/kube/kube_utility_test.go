@@ -1,10 +1,10 @@
-package global_test
+package kube_test
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/techdecaf/k2s/v2/pkg/global"
+	"github.com/techdecaf/k2s/v2/pkg/kube"
 )
 
 func TestUtilityFunctions(t *testing.T) {
@@ -33,7 +33,7 @@ func TestUtilityFunctions(t *testing.T) {
 
 	for when, given := range tests {
 		t.Run(when, func(t *testing.T) {
-			res := global.StringDefault(given.params...)
+			res := kube.StringDefault(given.params...)
 			assert.Equal(t, res, given.expect)
 		})
 	}
