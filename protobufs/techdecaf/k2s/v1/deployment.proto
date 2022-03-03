@@ -6,4 +6,12 @@ option go_package = "pkg/dto";
 
 message DeploymentRequest {
   string name = 1;
+  string image = 2;
+  string version = 3;
+  map<string, string> environment = 4;
+}
+
+message DeploymentResponse {
+  string id = 1;
+  string names = 2;
 }
