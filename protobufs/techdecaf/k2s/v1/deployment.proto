@@ -13,5 +13,5 @@ message DeploymentRequest {
 
 message DeploymentResponse {
   string id = 1;
-  string names = 2;
+  string name = 2;
 }
