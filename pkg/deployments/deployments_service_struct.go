@@ -44,13 +44,14 @@ func (t *DeploymentService) OnModuleInit() error {
 	go func() {
 		for i := range onCreate.Observe() {
 			d := i.V.(*dto.Deployment)
-			t.log.Infof("deploying [id:%s] [name:%s] [version:%s]", d.Metadata.Id, d.Metadata.Name, d.Metadata.Version)
+			t.log.Warnf("CREATE [id:%s] [name:%s] [version:%s]", d.Metadata.Id, d.Metadata.Name, d.Metadata.Version)
 		}
 	}()
 	go func() {
 		for i := range onDelete.Observe() {
 			d := i.V.(*dto.Deployment)
-			t.log.Infof("deleting [name: %s] [version: %s]", d.Metadata.Name, d.Metadata.Version)
+			t.log.Warnf("DELETE [id:%s] [name:%s] [version:%s]", d.Metadata.Id, d.Metadata.Name, d.Metadata.Version)
+
 		}
 	}()
 	return nil

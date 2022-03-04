@@ -22,7 +22,7 @@ tasks:
     description: lints and generates protobuf files.
     commands:
       - "buf lint"
-      # - "buf breaking --against ../.git#branch=master"
+      - "buf breaking --against ../.git#branch=master"
       - "buf generate"
 
   dev:
