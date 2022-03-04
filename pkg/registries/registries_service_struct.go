@@ -66,6 +66,8 @@ func (t *RegistryService) CopyPrivateRegistry(stream rxgo.Observable) {
 
 // OnModuleInit function description
 func (t *RegistryService) OnModuleInit() error {
+	rx := kube.Rx{}
+
 	if t.config.PRIVATE_REGISTRY_ENABLED == "false" {
 		return nil
 	}
@@ -87,8 +89,8 @@ func (t *RegistryService) OnModuleInit() error {
 
 	// filter on namespace added events
 	t.onNamespaceAdded = t.onNamespaceEvent.
-		Filter(kube.FilterEventOnType(watch.Added)).
-		Map(kube.ToNamespaceEvent())
+		Filter(rx.EventTypeFilter(watch.Added)).
+		Map(rx.NamespaceMap())
 
 	go t.CopyPrivateRegistry(t.onNamespaceAdded)
 

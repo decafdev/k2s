@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/nats-io/nats.go"
 	"github.com/techdecaf/k2s/v2/pkg/config"
+	"github.com/techdecaf/k2s/v2/pkg/deployments"
 	"github.com/techdecaf/k2s/v2/pkg/global"
 	"github.com/techdecaf/k2s/v2/pkg/healthz"
 	"github.com/techdecaf/k2s/v2/pkg/kube"
@@ -92,14 +93,10 @@ func main() {
 		healthz.Module(services.Gin, services.Config, services.Log)
 		traefik.Module(services.Gin, configService, kubeService, log)
 		registries.Module(services.Gin, configService, kubeService, log)
+		deployments.Module(services.Gin, services.Streams, kubeService, log)
 	}
 
 	// CleanUp
-	if err := dependencies.Gin.Run(fmt.Sprintf("0.0.0.0:%s", configService.PORT)); err != nil {
-		log.Fatal(err)
-	}
-
-	if err := nc.Drain(); err != nil {
-		log.Fatal(err)
-	}
+	log.Fatal(dependencies.Gin.Run(fmt.Sprintf("0.0.0.0:%s", configService.PORT)))
+	log.Fatal(nc.Drain())
 }

@@ -17,13 +17,13 @@ tasks:
     description: runs when no tasks have been specified.
     commands: [tasks list]
 
-  buff-lint:
-    dir: "protobuf"
-    command: [buf lint]
-
-  buff-build:
-    dir: "protobuf"
-    command: [buf build]
+  proto:
+    dir: "protobufs"
+    description: lints and generates protobuf files.
+    commands:
+      - "buf lint"
+      # - "buf breaking --against ../.git#branch=master"
+      - "buf generate"
 
   dev:
     description: starts service in watch mode

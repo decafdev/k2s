@@ -108,21 +108,18 @@ func (t *Client) SendResponse(subject string) rxgo.Observable {
 
 // OnTableEvent method
 func (t *Client) OnTableEvent(table nats.KeyValue) rxgo.Observable {
-	ch := make(chan rxgo.Item)
-	watcher, err := table.WatchAll()
-	if err != nil {
-		ch <- rxgo.Error(err)
-	}
-
-	go func() {
+	return rxgo.Defer([]rxgo.Producer{func(_ context.Context, ch chan<- rxgo.Item) {
+		watcher, err := table.Watch(">")
+		if err != nil {
+			ch <- rxgo.Error(err)
+		}
 		for update := range watcher.Updates() {
 			if update != nil {
 				ch <- rxgo.Of(update)
 			}
 		}
-	}()
-
-	return rxgo.FromChannel(ch)
+		close(ch)
+	}})
 }
 
 // OnStreamEvent method
@@ -228,7 +225,7 @@ func (t *Client) Table(name string) (nats.KeyValue, error) {
 		Bucket:  bucket,
 		History: 3,
 		Storage: nats.MemoryStorage,
-		TTL:     time.Millisecond * 100,
+		// TTL:     time.Second * 5,
 		// Description: "",
 		//MaxValueSize: 0,
 		//MaxBytes:     0,

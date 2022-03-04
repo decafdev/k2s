@@ -17,7 +17,5 @@ func Module(app *gin.Engine, config *config.ConfigService, k8s *kube.Service, lo
 		log.Fatal(err)
 	}
 
-	NewRegistryController(app, registryService)
-
 	log.Info("registries module loaded")
 }
