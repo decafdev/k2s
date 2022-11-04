@@ -1,6 +1,6 @@
 # K2S
 
-[![Discord](https://badgen.net/badge/icon/discord?icon=discord&label)]([https://https://discord.com/](https://discord.com/channels/929003936709509160/1038103432378187776))
+[![Discord](https://badgen.net/badge/icon/discord?icon=discord&label)](https://discord.com/channels/929003936709509160/1038103432378187776)
 
 ## Objectives
 
