@@ -1,5 +1,7 @@
 # K2S
 
+[![Discord](https://badgen.net/badge/icon/discord?icon=discord&label)]([https://https://discord.com/](https://discord.com/channels/929003936709509160/1038103432378187776))
+
 ## Objectives
 
 1. Eliminate the need for kubernetes specific knowledge when deploying api & event driven services
@@ -7,7 +9,7 @@
 
 ## Key Results
 
-- A first time user should be able their first k2s deployment in under 5 minutes without any prior kubernetes experience.
+- A first time user can create their first k2s deployment in under 5 minutes without any prior kubernetes experience.
 
 ## Features
 
@@ -39,3 +41,4 @@ List all deployments for a specific service
 Get deployment details for a specific version
 
 > GET:/deployments/:name/:version
+
