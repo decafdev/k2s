@@ -93,7 +93,7 @@ func main() {
 		healthz.Module(services.Gin, services.Config, services.Log)
 		traefik.Module(services.Gin, configService, kubeService, log)
 		registries.Module(services.Gin, configService, kubeService, log)
-		deployments.Module(services.Gin, services.Streams, kubeService, log)
+		deployments.Module(services.Gin, kubeService, log)
 	}
 
 	// CleanUp
