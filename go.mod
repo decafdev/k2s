@@ -9,7 +9,7 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/reactivex/rxgo/v2 v2.5.0
 	github.com/stretchr/testify v1.8.1
-	github.com/swaggo/swag v1.7.4
+	github.com/swaggo/swag v1.8.7
 	google.golang.org/protobuf v1.28.1
 	k8s.io/api v0.25.3
 )
@@ -26,7 +26,7 @@ require (
 	github.com/gkampitakis/ciinfo v0.1.0 // indirect
 	github.com/go-openapi/jsonpointer v0.19.5 // indirect
 	github.com/go-openapi/jsonreference v0.20.0 // indirect
-	github.com/go-openapi/spec v0.20.3 // indirect
+	github.com/go-openapi/spec v0.20.4 // indirect
 	github.com/go-openapi/swag v0.22.3 // indirect
 	github.com/go-playground/locales v0.14.0 // indirect
 	github.com/go-playground/universal-translator v0.18.0 // indirect
