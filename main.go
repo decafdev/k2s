@@ -5,7 +5,6 @@ import (
 	"os"
 
 	"github.com/gin-gonic/gin"
-	"github.com/nats-io/nats.go"
 	"github.com/techdecaf/k2s/v2/pkg/config"
 	"github.com/techdecaf/k2s/v2/pkg/deployments"
 	"github.com/techdecaf/k2s/v2/pkg/global"
@@ -13,7 +12,6 @@ import (
 	"github.com/techdecaf/k2s/v2/pkg/kube"
 	"github.com/techdecaf/k2s/v2/pkg/logger"
 	"github.com/techdecaf/k2s/v2/pkg/registries"
-	"github.com/techdecaf/k2s/v2/pkg/streams"
 	"github.com/techdecaf/k2s/v2/pkg/traefik"
 	coreV1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -50,16 +48,6 @@ func main() {
 	}
 	log := logger.NewLogger(configService)
 
-	nc, err := nats.Connect(nats.DefaultURL)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	eventsService, err := streams.NewClient(configService.SERVICE_NAME, nc)
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	kubeService, err := kube.NewKubeService()
 	if err != nil {
 		log.Fatal(err)
@@ -68,7 +56,7 @@ func main() {
 	// create new gin application
 	gin.SetMode(gin.ReleaseMode)
 
-	dependencies := global.NewDependencies(log, gin.New(), kubeService, configService, eventsService)
+	dependencies := global.NewDependencies(log, gin.New(), kubeService, configService)
 
 	// star the application
 	for item := range dependencies.OnModuleInit().Observe() {
@@ -77,7 +65,7 @@ func main() {
 			log.Fatal(err)
 		}
 
-		services := item.V.(*global.Dependencies)
+		services := item.V.(*global.Server)
 
 		if _, err = services.Kube.ApplyNamespace(&coreV1.Namespace{
 			ObjectMeta: metaV1.ObjectMeta{Name: services.Config.SERVICE_NAME},
@@ -98,5 +86,4 @@ func main() {
 
 	// CleanUp
 	log.Fatal(dependencies.Gin.Run(fmt.Sprintf("0.0.0.0:%s", configService.PORT)))
-	log.Fatal(nc.Drain())
 }

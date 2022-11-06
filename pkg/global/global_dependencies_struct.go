@@ -6,20 +6,18 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/techdecaf/k2s/v2/pkg/config"
 	"github.com/techdecaf/k2s/v2/pkg/kube"
-	"github.com/techdecaf/k2s/v2/pkg/streams"
 )
 
-// Dependencies struct
-type Dependencies struct {
-	Log     *logrus.Entry
-	Gin     *gin.Engine
-	Kube    *kube.Service
-	Config  *config.ConfigService
-	Streams *streams.Client
+// Server struct
+type Server struct {
+	Log    *logrus.Entry
+	Gin    *gin.Engine
+	Kube   *kube.Service
+	Config *config.ConfigService
 }
 
 // OnModuleInit method
-func (t *Dependencies) OnModuleInit() rxgo.Observable {
+func (t *Server) OnModuleInit() rxgo.Observable {
 	return rxgo.Just(t)()
 }
 
@@ -29,14 +27,12 @@ func NewDependencies(
 	Gin *gin.Engine,
 	Kube *kube.Service,
 	Config *config.ConfigService,
-	Streams *streams.Client,
-) *Dependencies {
+) *Server {
 
-	return &Dependencies{
-		Log:     Log,
-		Gin:     Gin,
-		Kube:    Kube,
-		Config:  Config,
-		Streams: Streams,
+	return &Server{
+		Log:    Log,
+		Gin:    Gin,
+		Kube:   Kube,
+		Config: Config,
 	}
 }
