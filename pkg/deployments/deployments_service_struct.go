@@ -20,7 +20,7 @@ type DeploymentService struct {
 
 // CreateDeployment method
 func (t *DeploymentService) CreateDeployment(spec *state.DeploymentDTO) error {
-	apiResrouce, err := kube.NewAPIApplication(&kube.APIOptions{
+	application, err := kube.NewAPIApplication(&kube.APIOptions{
 		Name:        spec.Name,
 		Image:       spec.Image,
 		Port:        80,
@@ -35,7 +35,7 @@ func (t *DeploymentService) CreateDeployment(spec *state.DeploymentDTO) error {
 		t.log.Error(err)
 	}
 
-	return apiResrouce.Apply(t.k8s)
+	return application.Apply(t.k8s)
 
 	// return t.table.Create(spec)
 }
