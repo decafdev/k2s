@@ -16,6 +16,13 @@
 - [ ] support the use of a private registry
 - [ ] support api deployments
 
+## Set me up!
+
+### Get a k8s cluster up and running
+1. `go install sigs.k8s.io/kind@v0.17.0 && kind create cluster --config ./kind-config.yml --name local`
+2. Start docker `docker compose up -d`
+2. Start k2s `go run .`
+
 ## Configuration Options
 
 - `PRIVATE_REGISTRY_URL: https://my-registry.domain.io`

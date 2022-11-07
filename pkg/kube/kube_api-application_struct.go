@@ -48,6 +48,12 @@ type APIResources struct {
 
 // Apply method
 func (t *APIResources) Apply(client *Service) (err error) {
+	// TODO: actually apply
+	client.ApplyNamespace(t.Namespace)
+	client.ApplyService(t.Service.ObjectMeta.Namespace, t.Service)
+	client.ApplySecret(t.Secret.ObjectMeta.Namespace, t.Secret)
+	client.ApplyDeployment(t.Deployment.ObjectMeta.Namespace, t.Deployment)
+	client.ApplyIngress(t.Deployment.ObjectMeta.Namespace, t.Ingress)
 	return nil
 }
 

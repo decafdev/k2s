@@ -10,6 +10,7 @@ import (
 	"github.com/reactivex/rxgo/v2"
 	appsV1 "k8s.io/api/apps/v1"
 	coreV1 "k8s.io/api/core/v1"
+	netV1 "k8s.io/api/networking/v1"
 	rbacV1 "k8s.io/api/rbac/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -129,6 +130,18 @@ func (t *Service) ApplyDeployment(namespace string, spec *appsV1.Deployment) (*a
 		return update(t.ctx, spec, metaV1.UpdateOptions{})
 	}
 
+	return res, err
+}
+
+// ApplyIngress method
+func (t *Service) ApplyIngress(namespace string, spec *netV1.Ingress) (*netV1.Ingress, error) {
+	create := t.k8s.NetworkingV1().Ingresses(namespace).Create
+	update := t.k8s.NetworkingV1().Ingresses(namespace).Update
+	res, err := create(t.ctx, spec, metaV1.CreateOptions{})
+
+	if apierrors.IsAlreadyExists(err) {
+		return update(t.ctx, spec, metaV1.UpdateOptions{})
+	}
 	return res, err
 }
 

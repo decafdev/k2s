@@ -17,7 +17,7 @@ func NewDeploymentController(app *gin.Engine, deploymentSvc *DeploymentService) 
 
 	router.GET("", controller.ListDeployments)
 	router.POST("", controller.CreateDeployment)
-	router.DELETE("/:id", controller.DeleteDeployment)
+	// router.DELETE("/:id", controller.DeleteDeployment)
 
 	return controller
 }
@@ -45,12 +45,12 @@ func (t *DeploymentController) ListDeployments(context *gin.Context) {
 // @Param BodyDTO body BodyDTO true "request body"
 // @Success 200 {object} BodyDTO
 // @Router /deployments [GET]
-func (t *DeploymentController) DeleteDeployment(context *gin.Context) {
-	if err := t.deploy.DeleteDeployment(context.Param("id")); err != nil {
-		global.GinerateError(context, global.InternalServerError(err))
-	}
-	context.JSON(http.StatusAccepted, "success")
-}
+// func (t *DeploymentController) DeleteDeployment(context *gin.Context) {
+// 	if err := t.deploy.DeleteDeployment(context.Param("id")); err != nil {
+// 		global.GinerateError(context, global.InternalServerError(err))
+// 	}
+// 	context.JSON(http.StatusAccepted, "success")
+// }
 
 // @Summary list deployed services
 // @Description list deployed services
@@ -67,11 +67,12 @@ func (t *DeploymentController) CreateDeployment(context *gin.Context) {
 		return
 	}
 
-	rev, err := t.deploy.CreateDeployment(&deployment)
+	err := t.deploy.CreateDeployment(&deployment)
 	if err != nil {
+		t.deploy.log.Error(err)
 		global.GinerateError(context, global.InternalServerError(err))
 		return
 	}
 
-	context.JSON(http.StatusOK, rev)
+	context.JSON(http.StatusOK, nil)
 }

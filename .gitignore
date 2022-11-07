@@ -2,3 +2,5 @@ tmp
 build
 coverage.out
 *.log
+.idea/
+.vscode/
