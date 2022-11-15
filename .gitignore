@@ -4,3 +4,4 @@ coverage.out
 *.log
 .idea/
 .vscode/
+.DS_Store
