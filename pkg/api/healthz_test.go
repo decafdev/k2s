@@ -9,7 +9,7 @@ import (
 
 func TestHealthzController(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	config, _ := util.NewConfig("VERSION=99.99.99").Validate()
+	util.NewConfig("VERSION=99.99.99").Validate()
 	type expected struct {
 		response string
 		code     int
