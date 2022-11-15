@@ -60,16 +60,16 @@ func TestTraefikOptions(t *testing.T) {
 			HostHTTPSPort:     32443,
 			HostDashboardPort: 32088,
 		},
-		err: "Key: 'ResourceOptions.HostHTTPPort' Error:Field validation for 'HostHTTPPort' failed on the 'min' tag",
+		err: "Key: 'TraefikResourceOptions.HostHTTPPort' Error:Field validation for 'HostHTTPPort' failed on the 'min' tag",
 	}
 
 	scenario["when I validate an empty deployment spec"] = given{
 		input:  &TraefikResourceOptions{},
 		expect: defaults,
 		err: strings.Join([]string{
-			"Key: 'ResourceOptions.Name' Error:Field validation for 'Name' failed on the 'required' tag",
-			"Key: 'ResourceOptions.Namespace' Error:Field validation for 'Namespace' failed on the 'required' tag",
-			"Key: 'ResourceOptions.Version' Error:Field validation for 'Version' failed on the 'semver' tag",
+			"Key: 'TraefikResourceOptions.Name' Error:Field validation for 'Name' failed on the 'required' tag",
+			"Key: 'TraefikResourceOptions.Namespace' Error:Field validation for 'Namespace' failed on the 'required' tag",
+			"Key: 'TraefikResourceOptions.Version' Error:Field validation for 'Version' failed on the 'semver' tag",
 		}, "\n"),
 	}
 
