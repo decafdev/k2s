@@ -1,8 +1,0 @@
-
-[TestTraefikConfig/when_all_options_are_set - 1]
-{"HTTP":{"Middlewares":{"forward-auth":{"ForwardAuth":{"Address":"https://someplace.com","TrustForwardHeader":true,"AuthRequestHeaders":[""],"AuthResponseHeaders":[""]}},"rate-limit-100":{"RateLimit":{"SourceCriterion":{"RequestHeaderName":"authorization"},"Average":100,"Burst":100}},"rewrite-url":{"StripPrefixRegex":{"Regex":[""]}}}}}
----
-
-[TestTraefikConfig/when_no_traefik_options_are_provided - 1]
-{"HTTP":{"Middlewares":{}}}
----

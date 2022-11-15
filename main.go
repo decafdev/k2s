@@ -4,15 +4,11 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/gin-gonic/gin"
-	"github.com/techdecaf/k2s/v2/pkg/config"
+	"github.com/techdecaf/k2s/v2/pkg/api"
 	"github.com/techdecaf/k2s/v2/pkg/deployments"
-	"github.com/techdecaf/k2s/v2/pkg/global"
-	"github.com/techdecaf/k2s/v2/pkg/healthz"
 	"github.com/techdecaf/k2s/v2/pkg/kube"
-	"github.com/techdecaf/k2s/v2/pkg/logger"
-	"github.com/techdecaf/k2s/v2/pkg/registries"
 	"github.com/techdecaf/k2s/v2/pkg/traefik"
+	"github.com/techdecaf/k2s/v2/pkg/util"
 	coreV1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -42,48 +38,36 @@ func main() {
 	os.Setenv("SERVICE_NAME", SERVICE_NAME)
 	os.Setenv("VERSION", VERSION)
 
-	configService, err := config.NewConfigService(os.Environ()...).Validate()
+	config, err := util.NewConfig(os.Environ()...).Validate()
 	if err != nil {
 		panic(err)
 	}
-	log := logger.NewLogger(configService)
 
-	kubeService, err := kube.NewKubeService()
+	logger := util.NewLogger(config)
+
+	kubeClient, err := kube.NewKubeClient()
 	if err != nil {
-		log.Fatal(err)
+		logger.Fatal(err)
 	}
 
-	// create new gin application
-	gin.SetMode(gin.ReleaseMode)
-
-	dependencies := global.NewDependencies(log, gin.New(), kubeService, configService)
-
-	// star the application
-	for item := range dependencies.OnModuleInit().Observe() {
-		err := item.E
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		services := item.V.(*global.Server)
-
-		if _, err = services.Kube.ApplyNamespace(&coreV1.Namespace{
-			ObjectMeta: metaV1.ObjectMeta{Name: services.Config.SERVICE_NAME},
-		}); err != nil && !apierrors.IsAlreadyExists(err) {
-			log.Fatal(err)
-		}
-
-		// middlewares
-		services.Gin.Use(logger.Middleware(configService))
-		// services.Gin.Use(ddtrace.Middleware(config.SERVICE_NAME))
-
-		// modules
-		healthz.Module(services.Gin, services.Config, services.Log)
-		traefik.Module(services.Gin, configService, kubeService, log)
-		registries.Module(services.Gin, configService, kubeService, log)
-		deployments.Module(services.Gin, kubeService, log)
+	_, err = kubeClient.ApplyNamespace(&coreV1.Namespace{ObjectMeta: metaV1.ObjectMeta{Name: config.SERVICE_NAME}})
+	if err != nil && !apierrors.IsAlreadyExists(err) {
+		logger.Fatal(err)
 	}
 
-	// CleanUp
-	log.Fatal(dependencies.Gin.Run(fmt.Sprintf("0.0.0.0:%s", configService.PORT)))
+	err = traefik.StartTraefik(kubeClient, config, logger)
+	if err != nil {
+		logger.Fatal(err)
+	}
+
+	deploymentService := deployments.NewDeploymentService(kubeClient, logger)
+
+	server := api.NewServer(config, logger, deploymentService)
+
+	address := fmt.Sprintf("0.0.0.0:%s", config.PORT)
+
+	err = server.Start(address)
+	if err != nil {
+		logger.Fatal(err)
+	}
 }

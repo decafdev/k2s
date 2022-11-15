@@ -1,23 +1,21 @@
-package traefik_test
+package traefik
 
 import (
 	"reflect"
 	"strings"
 	"testing"
-
-	"github.com/techdecaf/k2s/v2/pkg/traefik"
 )
 
 func TestTraefikOptions(t *testing.T) {
 	// given struct
 	type given struct {
-		input  *traefik.ResourceOptions
-		expect traefik.ResourceOptions
+		input  *TraefikResourceOptions
+		expect TraefikResourceOptions
 		err    string
 	}
 
 	// traefik default options
-	defaults := traefik.ResourceOptions{
+	defaults := TraefikResourceOptions{
 		Replicas:          1,
 		HostHTTPPort:      32080,
 		HostHTTPSPort:     32443,
@@ -27,14 +25,14 @@ func TestTraefikOptions(t *testing.T) {
 	scenario := make(map[string]given)
 
 	scenario["when I pass all required params"] = given{
-		input: &traefik.ResourceOptions{
+		input: &TraefikResourceOptions{
 			Name:         "Test",
 			Namespace:    "Testing",
 			Version:      "99.99.99",
 			Replicas:     3,
 			HostHTTPPort: 32099,
 		},
-		expect: traefik.ResourceOptions{
+		expect: TraefikResourceOptions{
 			Name:              "test",
 			Namespace:         "testing",
 			Version:           "99.99.99",
@@ -46,14 +44,14 @@ func TestTraefikOptions(t *testing.T) {
 	}
 
 	scenario["when I specify a host port smaller than 32000"] = given{
-		input: &traefik.ResourceOptions{
+		input: &TraefikResourceOptions{
 			Name:         "Test",
 			Namespace:    "Testing",
 			Version:      "99.99.99",
 			Replicas:     1,
 			HostHTTPPort: 80,
 		},
-		expect: traefik.ResourceOptions{
+		expect: TraefikResourceOptions{
 			Name:              "test",
 			Namespace:         "testing",
 			Version:           "99.99.99",
@@ -66,7 +64,7 @@ func TestTraefikOptions(t *testing.T) {
 	}
 
 	scenario["when I validate an empty deployment spec"] = given{
-		input:  &traefik.ResourceOptions{},
+		input:  &TraefikResourceOptions{},
 		expect: defaults,
 		err: strings.Join([]string{
 			"Key: 'ResourceOptions.Name' Error:Field validation for 'Name' failed on the 'required' tag",
