@@ -4,24 +4,37 @@
 
 ## Objectives
 
-1. Eliminate the need for kubernetes specific knowledge when deploying api & event driven services
-2. Provide a simple mechanism for cluster admission control improving the overall security posture
+1. Eliminate the need for Kubernetes-specific knowledge when deploying API & event-driven services
+2. Provide a simple mechanism for cluster admission control, improving the overall security posture
 
 ## Key Results
 
-- A first time user can create their first k2s deployment in under 5 minutes without any prior kubernetes experience.
+- A first-time user can create their first k2s deployment in under 5 minutes without any prior Kubernetes experience.
 
 ## Features
 
 - [ ] support the use of a private registry
-- [ ] support api deployments
+- [ ] support API deployments
 
-## Set me up!
+## Setup and Teardown!
 
 ### Get a k8s cluster up and running
-1. `go install sigs.k8s.io/kind@v0.17.0 && kind create cluster --config ./kind-config.yml --name local`
-2. Start docker `docker compose up -d`
-2. Start k2s `go run .`
+
+1. Install kind `brew install kind`
+2. Create a cluster `kind create cluster --config ./kind-config.yml --name local`
+3. Start k2s `go run .`
+
+After you deploy your service, you access it via local port 32080. You access the Traefik ingress's dashboard via local port 32088.
+
+### Teardown
+
+If you want to tear your cluster down, `kind delete` doesn't seem to work very reliably, and we don't currently implement anything nicer. So, run:
+
+```
+docker stop local-control-plane && docker rm local-control-plane
+docker stop local-worker && docker rm local-worker
+docker stop local-worker2 && docker rm local-worker2
+```
 
 ## Configuration Options
 
@@ -33,11 +46,11 @@
 
 ## Endpoints
 
-create a new immutable deployment of the specified type
+Create a new immutable deployment of the specified type
 
 > POST:/deployments
 
-list all deployments
+List all deployments
 
 > GET:/deployments
 
@@ -48,4 +61,3 @@ List all deployments for a specific service
 Get deployment details for a specific version
 
 > GET:/deployments/:name/:version
-
