@@ -28,7 +28,9 @@ After you deploy your service, you access it via local port 32080. You access th
 
 ### Teardown
 
-If you want to tear your cluster down, `kind delete` doesn't seem to work very reliably, and we don't currently implement anything nicer. So, run:
+If you want to tear your cluster down, `kind delete` doesn't seem to work very reliably, and we don't currently implement anything nicer. So:
+
+First, change your Kubernetes context to something other than `kind-local`. Next, delete the `kind-local` context with `kubectl config delete-context kind-local`. Finally, run:
 
 ```
 docker stop local-control-plane && docker rm local-control-plane
