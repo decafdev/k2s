@@ -1,10 +1,11 @@
-version: "3"
-
+version: "3.8"
 services:
-  nats:
-    container_name: nats
-    image: "nats"
-    # volumes: [./nats/:/etc/nats]
-    # command: "-js -c /etc/nats/server.conf"
-    command: "-js"
-    ports: ["4222:4222", "6222:6222"]
+  dynamodb-local:
+    command: "-jar DynamoDBLocal.jar -sharedDb -dbPath ./data"
+    image: "amazon/dynamodb-local:1.20.0"
+    container_name: dynamodb-local
+    ports:
+      - "8000:8000"
+    volumes:
+      - "./docker/dynamodb:/home/dynamodblocal/data"
+    working_dir: /home/dynamodblocal
