@@ -1,38 +1,52 @@
 package db
 
 import (
-	"fmt"
-
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 )
 
-type CreateDeployment struct {
-	Image string `json:"image" binding:"required"`
-	Version string `json:"version" binding:"semver"`
-}
-
-func (d *DDBService) CreateDeployment() {
-	// var item Deployment
-	depl := CreateDeployment{Image: "my-image-repo/my-image", Version: "0.0.1"}
-
-	av, err := dynamodbattribute.MarshalMap(depl)
+func (d *DDBService) CreateDeployment(arg CreateDeployment) error {	
+	item, err := dynamodbattribute.MarshalMap(arg)
 	if err != nil {
-		fmt.Println(err.Error())
-		return
+		return err
 	}
 
 	input := &dynamodb.PutItemInput{
-		Item: av,
+		Item: item,
 		TableName: aws.String("Deployments"),
 	}
 
 	_, err = d.ddb.PutItem(input)
 	if err != nil {
-		fmt.Println(err.Error())
-		return 
+		return err
 	}
-	
-	fmt.Println("Success!")
+		
+	return nil
+}
+
+func (d *DDBService) GetDeployment(arg ReadDeployment) (Deployment, error) {
+	var depl Deployment
+
+	key, err := dynamodbattribute.MarshalMap(arg)
+	if err != nil {
+		return depl, err
+	}
+
+	input := &dynamodb.GetItemInput{
+		Key: key,
+		TableName: aws.String("Deployments"),
+	}
+
+	result, err := d.ddb.GetItem(input)
+	if err != nil {
+		return depl, err
+	}
+
+	err = dynamodbattribute.UnmarshalMap(result.Item, &depl)
+	if err != nil {
+		return depl, err
+	}
+
+	return depl, nil
 }
