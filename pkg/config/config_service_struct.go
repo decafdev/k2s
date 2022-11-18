@@ -24,6 +24,8 @@ type ConfigService struct {
 	PRIVATE_REGISTRY_URL     string `json:"PRIVATE_REGISTRY_URL" validate:"url" mod:"default=https://index.docker.io/v1/"`
 	PRIVATE_REGISTRY_USER    string `json:"PRIVATE_REGISTRY_USER" validate:"required_if=PRIVATE_REGISTRY_ENABLED true"`
 	PRIVATE_REGISTRY_PASS    string `json:"PRIVATE_REGISTRY_PASS" validate:"required_if=PRIVATE_REGISTRY_ENABLED true"`
+	AWS_REGION				 string `json:"AWS_REGION" mod:"default=us-west-2"`
+	DDB_URL					 string `json:"DDB_URL" mod:"default=http://localhost:8000"`
 }
 
 func (t *ConfigService) Validate() (*ConfigService, error) {

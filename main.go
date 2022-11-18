@@ -4,11 +4,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/gin-gonic/gin"
 	"github.com/techdecaf/k2s/v2/pkg/config"
+	"github.com/techdecaf/k2s/v2/pkg/db"
 	"github.com/techdecaf/k2s/v2/pkg/deployments"
 	"github.com/techdecaf/k2s/v2/pkg/global"
 	"github.com/techdecaf/k2s/v2/pkg/healthz"
@@ -56,55 +54,15 @@ func main() {
 		log.Fatal(err)
 	}
 
-	awsConfig := &aws.Config{
-		Region: aws.String("us-west-2"),
-		Endpoint: aws.String("http://localhost:8000"),
-	}
-
-	sess := session.Must(session.NewSession(awsConfig))
-
-	ddb := dynamodb.New(sess)
-
-	input := &dynamodb.CreateTableInput{
-		AttributeDefinitions: []*dynamodb.AttributeDefinition{
-			{
-				AttributeName: aws.String("image"),
-				AttributeType: aws.String("S"),
-			},
-			{
-				AttributeName: aws.String("version"),
-				AttributeType: aws.String("S"),
-			},
-		},
-		KeySchema: []*dynamodb.KeySchemaElement{
-			{
-				AttributeName: aws.String("image"),
-				KeyType: aws.String("HASH"),	
-			},
-			{
-				AttributeName: aws.String("version"),
-				KeyType: aws.String("RANGE"),
-			},
-		},
-		ProvisionedThroughput: &dynamodb.ProvisionedThroughput{
-			ReadCapacityUnits: aws.Int64(10),
-			WriteCapacityUnits: aws.Int64(10),
-		},
-		TableName: aws.String("Deployments"),
-	}
-
-	result, err := ddb.CreateTable(input)
+	ddbClient, err := db.NewDDB(configService)
 	if err != nil {
-		fmt.Println(err.Error())
-		return
+		log.Fatal(err)
 	}
-
-	fmt.Println(result)
 
 	// create new gin application
 	gin.SetMode(gin.ReleaseMode)
 
-	dependencies := global.NewDependencies(log, gin.New(), kubeService, configService)
+	dependencies := global.NewDependencies(log, gin.New(), kubeService, configService, ddbClient)
 
 	// star the application
 	for item := range dependencies.OnModuleInit().Observe() {
