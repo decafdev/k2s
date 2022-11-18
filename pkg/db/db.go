@@ -7,7 +7,11 @@ import (
 	"github.com/techdecaf/k2s/v2/pkg/config"
 )
 
-func NewDDB(config *config.ConfigService) (*dynamodb.DynamoDB, error) {
+type DDBService struct {
+	ddb *dynamodb.DynamoDB
+}
+
+func NewDDB(config *config.ConfigService) (*DDBService, error) {
 	awsConfig := &aws.Config{
 		Region: aws.String(config.AWS_REGION),
 		Endpoint: aws.String(config.DDB_URL),
@@ -16,6 +20,8 @@ func NewDDB(config *config.ConfigService) (*dynamodb.DynamoDB, error) {
 	sess := session.Must(session.NewSession(awsConfig))
 
 	ddb := dynamodb.New(sess)
+
+	ddbService := &DDBService{ddb: ddb}
 
 	input := &dynamodb.CreateTableInput{
 		AttributeDefinitions: []*dynamodb.AttributeDefinition{
@@ -45,10 +51,10 @@ func NewDDB(config *config.ConfigService) (*dynamodb.DynamoDB, error) {
 		TableName: aws.String("Deployments"),
 	}
 
-	_, err := ddb.CreateTable(input)
+	_, err := ddbService.ddb.CreateTable(input)
 	if err != nil && err.Error() != "ResourceInUseException: Cannot create preexisting table" {
-		return ddb, err
+		return ddbService, err
 	}
 
-	return ddb, nil
+	return ddbService, nil
 }

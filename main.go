@@ -54,7 +54,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	ddbClient, err := db.NewDDB(configService)
+	ddbService, err := db.NewDDB(configService)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -62,7 +62,7 @@ func main() {
 	// create new gin application
 	gin.SetMode(gin.ReleaseMode)
 
-	dependencies := global.NewDependencies(log, gin.New(), kubeService, configService, ddbClient)
+	dependencies := global.NewDependencies(log, gin.New(), kubeService, configService, ddbService)
 
 	// star the application
 	for item := range dependencies.OnModuleInit().Observe() {

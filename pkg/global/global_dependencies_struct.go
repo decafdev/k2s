@@ -1,21 +1,21 @@
 package global
 
 import (
-	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/gin-gonic/gin"
 	"github.com/reactivex/rxgo/v2"
 	"github.com/sirupsen/logrus"
 	"github.com/techdecaf/k2s/v2/pkg/config"
+	"github.com/techdecaf/k2s/v2/pkg/db"
 	"github.com/techdecaf/k2s/v2/pkg/kube"
 )
 
 // Server struct
 type Server struct {
-	Log    *logrus.Entry
-	Gin    *gin.Engine
-	Kube   *kube.Service
-	Config *config.ConfigService
-	DDB *dynamodb.DynamoDB
+	Log    	*logrus.Entry
+	Gin    	*gin.Engine
+	Kube   	*kube.Service
+	Config 	*config.ConfigService
+	DDB 	*db.DDBService
 }
 
 // OnModuleInit method
@@ -29,7 +29,7 @@ func NewDependencies(
 	Gin *gin.Engine,
 	Kube *kube.Service,
 	Config *config.ConfigService,
-	DDB *dynamodb.DynamoDB,
+	DDB *db.DDBService,
 ) *Server {
 
 	return &Server{
