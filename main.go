@@ -59,6 +59,12 @@ func main() {
 		log.Fatal(err)
 	}
 
+	// JUST CHECKING
+
+	ddbService.CreateDeployment()
+
+	// JUST CHECKING
+
 	// create new gin application
 	gin.SetMode(gin.ReleaseMode)
 
