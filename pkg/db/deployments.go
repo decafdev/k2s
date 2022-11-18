@@ -50,3 +50,23 @@ func (d *DDBService) GetDeployment(arg ReadDeployment) (Deployment, error) {
 
 	return depl, nil
 }
+
+func (d *DDBService) ListDeployments() ([]Deployment, error) {
+	var depls []Deployment
+
+	input := &dynamodb.ScanInput{
+		TableName: aws.String("Deployments"),
+	}
+
+	output, err := d.ddb.Scan(input)
+	if err != nil {
+		return depls, err
+	}
+
+	err = dynamodbattribute.UnmarshalListOfMaps(output.Items, &depls)
+	if err != nil {
+		return depls, err
+	}
+
+	return depls, nil
+}
