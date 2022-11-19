@@ -1,58 +1,62 @@
 package db
 
 import (
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/dynamodb"
+	"context"
+	"errors"
+	"fmt"
+
+	"github.com/aws/aws-sdk-go-v2/aws"
+	cfg "github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
+	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
 	"github.com/techdecaf/k2s/v2/pkg/config"
 )
 
 type DDBService struct {
-	ddb *dynamodb.DynamoDB
+	ddb *dynamodb.Client
 }
 
 func NewDDB(config *config.ConfigService) (*DDBService, error) {
-	awsConfig := &aws.Config{
-		Region: aws.String(config.AWS_REGION),
-		Endpoint: aws.String(config.DDB_URL),
+	cfg, err := cfg.LoadDefaultConfig(context.Background())
+	if err != nil {
+		return nil, err
 	}
 
-	sess := session.Must(session.NewSession(awsConfig))
-
-	ddb := dynamodb.New(sess)
+	ddb := dynamodb.NewFromConfig(cfg, func(o *dynamodb.Options) {
+		o.EndpointResolver = dynamodb.EndpointResolverFromURL(config.DDB_URL)
+	})
 
 	ddbService := &DDBService{ddb: ddb}
 
 	input := &dynamodb.CreateTableInput{
-		AttributeDefinitions: []*dynamodb.AttributeDefinition{
+		AttributeDefinitions: []types.AttributeDefinition{
 			{
 				AttributeName: aws.String("image"),
-				AttributeType: aws.String("S"),
+				AttributeType: types.ScalarAttributeTypeS,
 			},
 			{
 				AttributeName: aws.String("version"),
-				AttributeType: aws.String("S"),
+				AttributeType: types.ScalarAttributeTypeS,
 			},
 		},
-		KeySchema: []*dynamodb.KeySchemaElement{
+		KeySchema: []types.KeySchemaElement{
 			{
 				AttributeName: aws.String("image"),
-				KeyType: aws.String("HASH"),	
+				KeyType: types.KeyTypeHash,	
 			},
 			{
 				AttributeName: aws.String("version"),
-				KeyType: aws.String("RANGE"),
+				KeyType: types.KeyTypeRange,
 			},
 		},
-		ProvisionedThroughput: &dynamodb.ProvisionedThroughput{
-			ReadCapacityUnits: aws.Int64(10),
-			WriteCapacityUnits: aws.Int64(10),
-		},
+		BillingMode: types.BillingModePayPerRequest,
 		TableName: aws.String("Deployments"),
 	}
 
-	_, err := ddbService.ddb.CreateTable(input)
-	if err != nil && err.Error() != "ResourceInUseException: Cannot create preexisting table" {
+	_, err = ddbService.ddb.CreateTable(context.Background(), input)
+	target := &types.ResourceInUseException{}
+	if err != nil && !errors.As(err, &target) {
+		fmt.Println(err.Error())
 		return ddbService, err
 	}
 

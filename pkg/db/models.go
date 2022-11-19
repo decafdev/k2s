@@ -6,11 +6,11 @@ type Deployment struct {
 }
 
 type CreateDeployment struct {
-	Image string `json:"image" binding:"required"`
-	Version string `json:"version" binding:"semver"`
+	Image string `json:"image" binding:"required" dynamodbav:"image"`
+	Version string `json:"version" binding:"semver" dynamodbav:"version"`
 }
 
 type ReadDeployment struct {
-	Image string `json:"image" binding:"required"`
-	Version string `json:"version" binding:"semver"`
+	Image string `json:"image" binding:"required" dynamodbav:"image"`
+	Version string `json:"version" binding:"semver" dynamodbav:"version"`
 }

@@ -1,13 +1,15 @@
 package db
 
 import (
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/dynamodb"
-	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
+	"context"
+
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
+	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 )
 
 func (d *DDBService) CreateDeployment(arg CreateDeployment) error {	
-	item, err := dynamodbattribute.MarshalMap(arg)
+	item, err := attributevalue.MarshalMap(arg)
 	if err != nil {
 		return err
 	}
@@ -17,7 +19,7 @@ func (d *DDBService) CreateDeployment(arg CreateDeployment) error {
 		TableName: aws.String("Deployments"),
 	}
 
-	_, err = d.ddb.PutItem(input)
+	_, err = d.ddb.PutItem(context.Background(), input)
 	if err != nil {
 		return err
 	}
@@ -28,7 +30,7 @@ func (d *DDBService) CreateDeployment(arg CreateDeployment) error {
 func (d *DDBService) GetDeployment(arg ReadDeployment) (Deployment, error) {
 	var depl Deployment
 
-	key, err := dynamodbattribute.MarshalMap(arg)
+	key, err := attributevalue.MarshalMap(arg)
 	if err != nil {
 		return depl, err
 	}
@@ -38,12 +40,12 @@ func (d *DDBService) GetDeployment(arg ReadDeployment) (Deployment, error) {
 		TableName: aws.String("Deployments"),
 	}
 
-	result, err := d.ddb.GetItem(input)
+	result, err := d.ddb.GetItem(context.Background(), input)
 	if err != nil {
 		return depl, err
 	}
 
-	err = dynamodbattribute.UnmarshalMap(result.Item, &depl)
+	err = attributevalue.UnmarshalMap(result.Item, &depl)
 	if err != nil {
 		return depl, err
 	}
@@ -58,12 +60,12 @@ func (d *DDBService) ListDeployments() ([]Deployment, error) {
 		TableName: aws.String("Deployments"),
 	}
 
-	output, err := d.ddb.Scan(input)
+	output, err := d.ddb.Scan(context.Background(), input)
 	if err != nil {
 		return depls, err
 	}
 
-	err = dynamodbattribute.UnmarshalListOfMaps(output.Items, &depls)
+	err = attributevalue.UnmarshalListOfMaps(output.Items, &depls)
 	if err != nil {
 		return depls, err
 	}
