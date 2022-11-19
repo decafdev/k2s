@@ -35,7 +35,21 @@ type DeploymentController struct {
 // @Router /deployments [GET]
 // ListDeployments method
 func (t *DeploymentController) ListDeployments(context *gin.Context) {
-	// context.JSON(http.StatusOK, []DeploymentDTO{{}})
+	// var deployment state.DeploymentDTO
+
+	// if err := context.ShouldBind(&deployment); err != nil {
+	// 	global.GinerateError(context, global.BadRequestError(err))
+	// 	return
+	// }
+
+	res, err := t.deploy.ListDeployments()
+	if err != nil {
+		t.deploy.log.Error(err)
+		global.GinerateError(context, global.InternalServerError(err))
+		return
+	}
+
+	context.JSON(http.StatusOK, res)
 }
 
 // @Summary delete a deployment
