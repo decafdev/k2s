@@ -76,9 +76,9 @@ func (t *DeploymentController) CreateDeployment(context *gin.Context) {
 	}
 
 	deployment := state.DeploymentDTO{
-		Name: deploymentReq.Name,
-		Image: deploymentReq.Image,
-		Version: deploymentReq.Version,
+		Name:        deploymentReq.Name,
+		Image:       deploymentReq.Image,
+		Version:     deploymentReq.Version,
 		Environment: deploymentReq.Environment,
 	}
 
@@ -100,7 +100,7 @@ func (t *DeploymentController) GetDeployment(context *gin.Context) {
 	}
 
 	depl := state.DeploymentDTO{
-		Name: deploymentReq.Name,
+		Name:    deploymentReq.Name,
 		Version: deploymentReq.Version,
 	}
 

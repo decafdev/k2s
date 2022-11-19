@@ -8,14 +8,14 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 )
 
-func (d *DDBService) CreateDeployment(arg CreateDeployment) error {	
+func (d *DDBService) CreateDeployment(arg CreateDeployment) error {
 	item, err := attributevalue.MarshalMap(arg)
 	if err != nil {
 		return err
 	}
 
 	input := &dynamodb.PutItemInput{
-		Item: item,
+		Item:      item,
 		TableName: aws.String("Deployments"),
 	}
 
@@ -23,7 +23,7 @@ func (d *DDBService) CreateDeployment(arg CreateDeployment) error {
 	if err != nil {
 		return err
 	}
-		
+
 	return nil
 }
 
@@ -36,7 +36,7 @@ func (d *DDBService) GetDeployment(arg ReadDeployment) (Deployment, error) {
 	}
 
 	input := &dynamodb.GetItemInput{
-		Key: key,
+		Key:       key,
 		TableName: aws.String("Deployments"),
 	}
 

@@ -14,22 +14,22 @@ import (
 )
 
 var create1 = CreateDeployment{
-	Name: "image",
+	Name:    "image",
 	Version: "0.0.0",
 }
 
 var create2 = CreateDeployment{
-	Name: "my-image",
+	Name:    "my-image",
 	Version: "0.99.0",
 }
 
 var read1 = ReadDeployment{
-	Name: "image",
+	Name:    "image",
 	Version: "0.0.0",
 }
 
 var read2 = ReadDeployment{
-	Name: "my-image",
+	Name:    "my-image",
 	Version: "0.99.0",
 }
 
@@ -44,7 +44,7 @@ var read3 = ReadDeployment{
 }
 
 var read4 = ReadDeployment{
-	Name: "doodle",
+	Name:    "doodle",
 	Version: "0.1.0",
 }
 
@@ -90,22 +90,22 @@ func TestCreateDeployment(t *testing.T) {
 	cleanup()
 }
 
-func TestGetDeployment(t *testing.T) {	
+func TestGetDeployment(t *testing.T) {
 	type given struct {
 		createArg CreateDeployment
-		readArg ReadDeployment
+		readArg   ReadDeployment
 	}
 
 	testsNoErrors := make(map[string]given)
 
 	testsNoErrors["when a deployment is in the db"] = given{
 		createArg: create1,
-		readArg: read1,
+		readArg:   read1,
 	}
 
 	testsNoErrors["when another deployment is in the db"] = given{
 		createArg: create2,
-		readArg: read2,
+		readArg:   read2,
 	}
 
 	for when, given := range testsNoErrors {
@@ -205,7 +205,7 @@ func createRandomDeployment(t *testing.T) {
 
 	testsNoErrors["when a deployment is properly specified"] = given{
 		arg: CreateDeployment{
-			Name: util.RandomString(6),
+			Name:    util.RandomString(6),
 			Version: fmt.Sprintf("%v.%v.%v", util.RandomInt(0, 99), util.RandomInt(0, 99), util.RandomInt(0, 99)),
 		},
 	}
@@ -235,7 +235,7 @@ func cleanup() {
 			input := &dynamodb.DeleteItemInput{
 				TableName: aws.String("Deployments"),
 				Key: map[string]types.AttributeValue{
-					"name": item["name"],
+					"name":    item["name"],
 					"version": item["version"],
 				},
 			}

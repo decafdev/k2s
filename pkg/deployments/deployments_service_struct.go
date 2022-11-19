@@ -44,7 +44,7 @@ func (t *DeploymentService) CreateDeployment(spec *state.DeploymentDTO) error {
 	}
 
 	ddbItem := db.CreateDeployment{
-		Name: spec.Name,
+		Name:    spec.Name,
 		Version: spec.Version,
 	}
 
@@ -61,7 +61,7 @@ func (t *DeploymentService) CreateDeployment(spec *state.DeploymentDTO) error {
 
 func (t *DeploymentService) GetDeployment(spec *state.DeploymentDTO) (*readDeploymentResponse, error) {
 	ddbItem := db.ReadDeployment{
-		Name: spec.Name,
+		Name:    spec.Name,
 		Version: spec.Version,
 	}
 
@@ -72,7 +72,7 @@ func (t *DeploymentService) GetDeployment(spec *state.DeploymentDTO) (*readDeplo
 	}
 
 	resp := &readDeploymentResponse{
-		Name: depl.Name,
+		Name:    depl.Name,
 		Version: depl.Version,
 	}
 
@@ -89,7 +89,7 @@ func (t *DeploymentService) ListDeployments() ([]readDeploymentResponse, error) 
 	var resp []readDeploymentResponse
 	for _, depl := range depls {
 		item := readDeploymentResponse{
-			Name: depl.Name,
+			Name:    depl.Name,
 			Version: depl.Version,
 		}
 		resp = append(resp, item)

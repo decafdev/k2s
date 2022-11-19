@@ -11,11 +11,11 @@ import (
 
 // Server struct
 type Server struct {
-	Log    	*logrus.Entry
-	Gin    	*gin.Engine
-	Kube   	*kube.Service
-	Config 	*config.ConfigService
-	DDB 	*db.DDBService
+	Log    *logrus.Entry
+	Gin    *gin.Engine
+	Kube   *kube.Service
+	Config *config.ConfigService
+	DDB    *db.DDBService
 }
 
 // OnModuleInit method
@@ -37,6 +37,6 @@ func NewDependencies(
 		Gin:    Gin,
 		Kube:   Kube,
 		Config: Config,
-		DDB: DDB,
+		DDB:    DDB,
 	}
 }

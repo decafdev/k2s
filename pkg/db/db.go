@@ -12,6 +12,10 @@ import (
 	"github.com/techdecaf/k2s/v2/pkg/config"
 )
 
+type DBService interface {
+	ListDeployments() ([]Deployment, error)
+}
+
 type DDBService struct {
 	ddb *dynamodb.Client
 }
@@ -42,15 +46,15 @@ func NewDDB(config *config.ConfigService) (*DDBService, error) {
 		KeySchema: []types.KeySchemaElement{
 			{
 				AttributeName: aws.String("name"),
-				KeyType: types.KeyTypeHash,	
+				KeyType:       types.KeyTypeHash,
 			},
 			{
 				AttributeName: aws.String("version"),
-				KeyType: types.KeyTypeRange,
+				KeyType:       types.KeyTypeRange,
 			},
 		},
 		BillingMode: types.BillingModePayPerRequest,
-		TableName: aws.String("Deployments"),
+		TableName:   aws.String("Deployments"),
 	}
 
 	_, err = ddbService.ddb.CreateTable(context.Background(), input)
