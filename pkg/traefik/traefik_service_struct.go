@@ -6,31 +6,30 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/techdecaf/k2s/v2/pkg/config"
 	"github.com/techdecaf/k2s/v2/pkg/kube"
-	apierrors "k8s.io/apimachinery/pkg/api/errors"
 )
 
-var test = []byte(`
-http:
-  middlewares:
-    forward-auth:
-      forwardAuth:
-        address: https://someplace.com
-        trustForwardHeader: true
-        authRequestHeaders:
-        - ""
-        authResponseHeaders:
-        - ""
-    rate-limit-100:
-      rateLimit:
-        sourceCriterion:
-          requestHeaderName: authorization
-        average: 100
-        burst: 100
-    rewrite-url:
-      stripPrefixRegex:
-        regex:
-        - ""
-`)
+// var test = []byte(`
+// http:
+//   middlewares:
+//     forward-auth:
+//       forwardAuth:
+//         address: https://someplace.com
+//         trustForwardHeader: true
+//         authRequestHeaders:
+//         - ""
+//         authResponseHeaders:
+//         - ""
+//     rate-limit-100:
+//       rateLimit:
+//         sourceCriterion:
+//           requestHeaderName: authorization
+//         average: 100
+//         burst: 100
+//     rewrite-url:
+//       stripPrefixRegex:
+//         regex:
+//         - ""
+// `)
 
 // TraefikService struct
 type TraefikService struct {
@@ -67,9 +66,12 @@ func (t *TraefikService) OnModuleInit() error {
 	}
 
 	traefik, err := NewTraefikResources(options, &TraefikConfig{})
+	if err != nil {
+		return err
+	}
 
 	t.log.Info("deploying traefik.service-account")
-	if _, err = t.k8s.CreateServiceAccount(options.Namespace, traefik.ServiceAccount); !apierrors.IsAlreadyExists(err) {
+	if _, err = t.k8s.ApplyServiceAccount(options.Namespace, traefik.ServiceAccount); err != nil {
 		return err
 	}
 

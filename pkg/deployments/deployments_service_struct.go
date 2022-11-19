@@ -2,13 +2,14 @@ package deployments
 
 import (
 	"github.com/sirupsen/logrus"
+	"github.com/techdecaf/k2s/v2/pkg/db"
 	"github.com/techdecaf/k2s/v2/pkg/kube"
 	"github.com/techdecaf/k2s/v2/pkg/state"
 )
 
 // NewDeploymentService function description
-func NewDeploymentService(k8s *kube.Service, log *logrus.Entry) *DeploymentService {
-	return &DeploymentService{k8s: k8s}
+func NewDeploymentService(k8s *kube.Service, log *logrus.Entry, ddb *db.DDBService) *DeploymentService {
+	return &DeploymentService{k8s: k8s, log: log, ddb: ddb}
 }
 
 // DeploymentService struct
@@ -16,6 +17,7 @@ type DeploymentService struct {
 	// table *state.DeploymentsTable
 	k8s *kube.Service
 	log *logrus.Entry
+	ddb *db.DDBService
 }
 
 // CreateDeployment method
@@ -32,10 +34,27 @@ func (t *DeploymentService) CreateDeployment(spec *state.DeploymentDTO) error {
 		Middlewares: []string{},
 	})
 	if err != nil {
-		t.log.Error(err)
+		t.log.Error("failed to create new api app", err)
+		return err
 	}
 
-	return application.Apply(t.k8s)
+	err = application.Apply(t.k8s)
+	if err != nil {
+		t.log.Error("failed to apply changes to cluster", err)
+	}
+
+	ddbItem := db.CreateDeployment{
+		Image: spec.Image,
+		Version: spec.Version,
+	}
+
+	err = t.ddb.CreateDeployment(ddbItem)
+	if err != nil {
+		t.log.Error("failed to put deployment to ddb", err)
+		return err
+	}
+
+	return nil
 
 	// return t.table.Create(spec)
 }

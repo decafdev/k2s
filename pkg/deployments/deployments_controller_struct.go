@@ -60,11 +60,18 @@ func (t *DeploymentController) ListDeployments(context *gin.Context) {
 // @Router /deployments [GET]
 // ListDeployments method
 func (t *DeploymentController) CreateDeployment(context *gin.Context) {
-	var deployment state.DeploymentDTO
+	var deploymentReq createDeploymentRequest
 
-	if err := context.ShouldBind(&deployment); err != nil {
+	if err := context.ShouldBind(&deploymentReq); err != nil {
 		global.GinerateError(context, global.BadRequestError(err))
 		return
+	}
+
+	deployment := state.DeploymentDTO{
+		Name: deploymentReq.Name,
+		Image: deploymentReq.Image,
+		Version: deploymentReq.Version,
+		Environment: deploymentReq.Environment,
 	}
 
 	err := t.deploy.CreateDeployment(&deployment)

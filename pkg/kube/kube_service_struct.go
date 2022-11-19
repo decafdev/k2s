@@ -210,17 +210,18 @@ func (t *Service) ApplyClusterRoleBinding(spec *rbacV1.ClusterRoleBinding) (*rba
 	return res, err
 }
 
-// CreateServiceAccount method
-func (t *Service) CreateServiceAccount(namespace string, spec *coreV1.ServiceAccount) (*coreV1.ServiceAccount, error) {
-	create := t.k8s.CoreV1().ServiceAccounts(namespace).Create
-	return create(t.ctx, spec, metaV1.CreateOptions{})
-}
+// // CreateServiceAccount method
+// func (t *Service) CreateServiceAccount(namespace string, spec *coreV1.ServiceAccount) (*coreV1.ServiceAccount, error) {
+// 	create := t.k8s.CoreV1().ServiceAccounts(namespace).Create
+// 	return create(t.ctx, spec, metaV1.CreateOptions{})
+// }
 
 // ApplyServiceAccount method
 func (t *Service) ApplyServiceAccount(namespace string, spec *coreV1.ServiceAccount) (*coreV1.ServiceAccount, error) {
+	create := t.k8s.CoreV1().ServiceAccounts(namespace).Create
 	update := t.k8s.CoreV1().ServiceAccounts(namespace).Update
 
-	res, err := t.CreateServiceAccount(namespace, spec)
+	res, err := create(t.ctx, spec, metaV1.CreateOptions{})
 	if apierrors.IsAlreadyExists(err) {
 		return update(t.ctx, spec, metaV1.UpdateOptions{})
 	}
