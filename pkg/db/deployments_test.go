@@ -14,22 +14,22 @@ import (
 )
 
 var create1 = CreateDeployment{
-	Image: "repo/image",
+	Name: "image",
 	Version: "0.0.0",
 }
 
 var create2 = CreateDeployment{
-	Image: "my-repo/my-image",
+	Name: "my-image",
 	Version: "0.99.0",
 }
 
 var read1 = ReadDeployment{
-	Image: "repo/image",
+	Name: "image",
 	Version: "0.0.0",
 }
 
 var read2 = ReadDeployment{
-	Image: "my-repo/my-image",
+	Name: "my-image",
 	Version: "0.99.0",
 }
 
@@ -40,11 +40,11 @@ var create4 = CreateDeployment{
 }
 
 var read3 = ReadDeployment{
-	Image: "my-repo/my-image",
+	Name: "my-image",
 }
 
 var read4 = ReadDeployment{
-	Image: "yankee/doodle",
+	Name: "doodle",
 	Version: "0.1.0",
 }
 
@@ -114,7 +114,7 @@ func TestGetDeployment(t *testing.T) {
 			depl, err := ddbService.GetDeployment(given.readArg)
 			require.NoError(t, err)
 			require.NotEmpty(t, depl)
-			require.Equal(t, depl.Image, given.createArg.Image)
+			require.Equal(t, depl.Name, given.createArg.Name)
 			require.Equal(t, depl.Version, given.createArg.Version)
 			cleanup()
 		})
@@ -205,7 +205,7 @@ func createRandomDeployment(t *testing.T) {
 
 	testsNoErrors["when a deployment is properly specified"] = given{
 		arg: CreateDeployment{
-			Image: util.RandomString(6),
+			Name: util.RandomString(6),
 			Version: fmt.Sprintf("%v.%v.%v", util.RandomInt(0, 99), util.RandomInt(0, 99), util.RandomInt(0, 99)),
 		},
 	}
@@ -235,7 +235,7 @@ func cleanup() {
 			input := &dynamodb.DeleteItemInput{
 				TableName: aws.String("Deployments"),
 				Key: map[string]types.AttributeValue{
-					"image": item["image"],
+					"name": item["name"],
 					"version": item["version"],
 				},
 			}

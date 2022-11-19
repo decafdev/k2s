@@ -31,7 +31,7 @@ func NewDDB(config *config.ConfigService) (*DDBService, error) {
 	input := &dynamodb.CreateTableInput{
 		AttributeDefinitions: []types.AttributeDefinition{
 			{
-				AttributeName: aws.String("image"),
+				AttributeName: aws.String("name"),
 				AttributeType: types.ScalarAttributeTypeS,
 			},
 			{
@@ -41,7 +41,7 @@ func NewDDB(config *config.ConfigService) (*DDBService, error) {
 		},
 		KeySchema: []types.KeySchemaElement{
 			{
-				AttributeName: aws.String("image"),
+				AttributeName: aws.String("name"),
 				KeyType: types.KeyTypeHash,	
 			},
 			{

@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-const alphaSlash = "abcdefghijklmnopqrstuvwxyz/"
+const alphaPlus = "abcdefghijklmnopqrstuvwxyz-_"
 
 func RandomInt(min, max int64) int64 {
 	return min + rand.Int63n(max - min + 1)
@@ -15,10 +15,10 @@ func RandomInt(min, max int64) int64 {
 func RandomString(n int) string {
 	var sb strings.Builder
 
-	k := len(alphaSlash)
+	k := len(alphaPlus)
 
 	for i := 0; i < n; i++ {
-		c := alphaSlash[rand.Intn(k)]
+		c := alphaPlus[rand.Intn(k)]
 		sb.WriteByte(c)
 	}
 

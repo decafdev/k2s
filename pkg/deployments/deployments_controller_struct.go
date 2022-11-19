@@ -15,8 +15,9 @@ func NewDeploymentController(app *gin.Engine, deploymentSvc *DeploymentService) 
 	// register routes
 	router := app.Group("/deployments")
 
-	router.GET("", controller.ListDeployments)
 	router.POST("", controller.CreateDeployment)
+	router.GET("/:name/:version", controller.GetDeployment)
+	router.GET("", controller.ListDeployments)
 	// router.DELETE("/:id", controller.DeleteDeployment)
 
 	return controller
@@ -82,4 +83,26 @@ func (t *DeploymentController) CreateDeployment(context *gin.Context) {
 	}
 
 	context.JSON(http.StatusOK, nil)
+}
+
+func (t *DeploymentController) GetDeployment(context *gin.Context) {
+	var deploymentReq readDeploymentRequest
+	if err := context.ShouldBindUri(&deploymentReq); err != nil {
+		global.GinerateError(context, global.BadRequestError(err))
+		return
+	}
+
+	depl := state.DeploymentDTO{
+		Name: deploymentReq.Name,
+		Version: deploymentReq.Version,
+	}
+
+	resp, err := t.deploy.GetDeployment(&depl)
+	if err != nil {
+		t.deploy.log.Error(err)
+		global.GinerateError(context, global.InternalServerError(err))
+		return
+	}
+
+	context.JSON(http.StatusOK, resp)
 }

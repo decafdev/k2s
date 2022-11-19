@@ -44,7 +44,7 @@ func (t *DeploymentService) CreateDeployment(spec *state.DeploymentDTO) error {
 	}
 
 	ddbItem := db.CreateDeployment{
-		Image: spec.Image,
+		Name: spec.Name,
 		Version: spec.Version,
 	}
 
@@ -57,6 +57,26 @@ func (t *DeploymentService) CreateDeployment(spec *state.DeploymentDTO) error {
 	return nil
 
 	// return t.table.Create(spec)
+}
+
+func (t *DeploymentService) GetDeployment(spec *state.DeploymentDTO) (*readDeploymentResponse, error) {
+	ddbItem := db.ReadDeployment{
+		Name: spec.Name,
+		Version: spec.Version,
+	}
+
+	depl, err := t.ddb.GetDeployment(ddbItem)
+	if err != nil {
+		t.log.Error("failed to get from ddb", err)
+		return nil, err
+	}
+
+	resp := &readDeploymentResponse{
+		Name: depl.Name,
+		Version: depl.Version,
+	}
+
+	return resp, nil
 }
 
 // DeleteDeployment method
