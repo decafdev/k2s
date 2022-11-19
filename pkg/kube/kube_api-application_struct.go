@@ -28,6 +28,7 @@ type APIOptions struct {
 	CPULimit    int64  `mod:"default=500"`
 	Variables   map[string]string
 	Middlewares []string `validate:"unique,dive,required,endswith=@file" mod:"lcase"`
+	CreatedBy   string
 }
 
 func (t *APIOptions) Validate() (*APIOptions, error) {
@@ -85,6 +86,8 @@ func NewAPIApplication(o *APIOptions) (*APIResources, error) {
 		Namespace: fmt.Sprintf("%s-v%v", o.Name, version.Major()),
 		Labels: map[string]string{
 			"app.kubernetes.io/name": o.Name,
+			"created-by":             o.CreatedBy,
+			"version":                version.String(),
 		},
 	}
 

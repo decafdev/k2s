@@ -133,6 +133,16 @@ func (t *Service) ApplyDeployment(namespace string, spec *appsV1.Deployment) (*a
 	return res, err
 }
 
+// ListDeployments
+func (t *Service) ListDeployments(namespace string, options metaV1.ListOptions) (*appsV1.DeploymentList, error) {
+	return t.k8s.AppsV1().Deployments(namespace).List(t.ctx, options)
+}
+
+// ListNamespaces method
+func (t *Service) ListNamespaces(options metaV1.ListOptions) (*coreV1.NamespaceList, error) {
+	return t.k8s.CoreV1().Namespaces().List(t.ctx, options)
+}
+
 // ApplyIngress method
 func (t *Service) ApplyIngress(namespace string, spec *netV1.Ingress) (*netV1.Ingress, error) {
 	create := t.k8s.NetworkingV1().Ingresses(namespace).Create
