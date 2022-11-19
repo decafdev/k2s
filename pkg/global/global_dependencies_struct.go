@@ -15,7 +15,7 @@ type Server struct {
 	Gin    *gin.Engine
 	Kube   *kube.Service
 	Config *config.ConfigService
-	DDB    *db.DDBService
+	DDB    db.DBService
 }
 
 // OnModuleInit method
@@ -29,7 +29,7 @@ func NewDependencies(
 	Gin *gin.Engine,
 	Kube *kube.Service,
 	Config *config.ConfigService,
-	DDB *db.DDBService,
+	DDB db.DBService,
 ) *Server {
 
 	return &Server{

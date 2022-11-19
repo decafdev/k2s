@@ -14,6 +14,8 @@ import (
 
 type DBService interface {
 	ListDeployments() ([]Deployment, error)
+	GetDeployment(arg ReadDeployment) (Deployment, error)
+	CreateDeployment(arg CreateDeployment) error
 }
 
 type DDBService struct {
