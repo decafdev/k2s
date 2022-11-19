@@ -79,6 +79,25 @@ func (t *DeploymentService) GetDeployment(spec *state.DeploymentDTO) (*readDeplo
 	return resp, nil
 }
 
+func (t *DeploymentService) ListDeployments() ([]readDeploymentResponse, error) {
+	depls, err := t.ddb.ListDeployments()
+	if err != nil {
+		t.log.Error("failed to get from ddb", err)
+		return nil, err
+	}
+
+	var resp []readDeploymentResponse
+	for _, depl := range depls {
+		item := readDeploymentResponse{
+			Name: depl.Name,
+			Version: depl.Version,
+		}
+		resp = append(resp, item)
+	}
+
+	return resp, nil
+}
+
 // DeleteDeployment method
 // func (t *DeploymentService) DeleteDeployment(key string) (err error) {
 // 	return t.table.Delete(key)
