@@ -29,7 +29,6 @@ func TestDeploymentsController(t *testing.T) {
 		url           string
 		body          []byte
 		expectations  func(srv *mock_depl_srv.MockDeploymentSrv)
-		checkResponse func(t *testing.T, res *httptest.ResponseRecorder)
 	}
 
 	testPost := make(map[string]given)
@@ -44,10 +43,6 @@ func TestDeploymentsController(t *testing.T) {
 		body:   json_data,
 		expectations: func(srv *mock_depl_srv.MockDeploymentSrv) {
 			srv.EXPECT().CreateDeployment(gomock.Eq(depl)).Times(1).Return(nil)
-		},
-		checkResponse: func(t *testing.T, res *httptest.ResponseRecorder) {
-			require.Equal(t, http.StatusOK, res.Code)
-			requireBodyMatch(t, nil, res.Body)
 		},
 	}
 
@@ -82,9 +77,10 @@ func TestDeploymentsController(t *testing.T) {
 			context.Request.Header.Set("Content-Type", "application/json")
 			require.NoError(t, err)
 
-			// send request
+			// send request and check response
 			app.ServeHTTP(res, context.Request)
-			given.checkResponse(t, res)
+			require.Equal(t, http.StatusOK, res.Code)
+			requireBodyMatch(t, nil, res.Body)
 		})
 	}
 }
