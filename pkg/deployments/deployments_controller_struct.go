@@ -36,7 +36,7 @@ type DeploymentController struct {
 // @Router /deployments [GET]
 // ListDeployments method
 func (t *DeploymentController) ListDeployments(context *gin.Context) {
-	// var deployment state.DeploymentDTO
+	// var deployment DeploymentDTO
 
 	// if err := context.ShouldBind(&deployment); err != nil {
 	// 	global.GinerateError(context, global.BadRequestError(err))

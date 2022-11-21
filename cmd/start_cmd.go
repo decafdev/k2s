@@ -36,7 +36,7 @@ import (
 // @BasePath /
 // @schemes http
 var serveCmd = &cobra.Command{
-	Use:   "serve",
+	Use:   "start",
 	Short: "starts the k2s rest api server",
 	Long:  `starts the k2s rest api server`,
 	Run: func(cmd *cobra.Command, args []string) {

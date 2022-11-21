@@ -29,7 +29,7 @@ type CommonLabels struct {
 // DeploymentService struct
 type DeploymentService struct {
 	labels CommonLabels
-	// table *state.DeploymentsTable
+	// table *DeploymentsTable
 	k8s *kube.Service
 }
 
