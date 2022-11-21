@@ -4,12 +4,13 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 	"github.com/techdecaf/k2s/v2/pkg/global"
 )
 
 // NewDeploymentController function description
-func NewDeploymentController(app *gin.Engine, deploymentSvc *DeploymentService) *DeploymentController {
-	controller := &DeploymentController{deploy: deploymentSvc}
+func NewDeploymentController(app *gin.Engine, deploymentSvc DeploymentSrv, log *logrus.Entry) *DeploymentController {
+	controller := &DeploymentController{deploy: deploymentSvc, log: log}
 
 	// register routes
 	router := app.Group("/deployments")
@@ -23,7 +24,8 @@ func NewDeploymentController(app *gin.Engine, deploymentSvc *DeploymentService) 
 
 // DeploymentController struct
 type DeploymentController struct {
-	deploy *DeploymentService
+	deploy DeploymentSrv
+	log    *logrus.Entry
 }
 
 // @Summary list deployed services
@@ -43,7 +45,7 @@ func (t *DeploymentController) ListDeployments(context *gin.Context) {
 
 	res, err := t.deploy.ListDeployments()
 	if err != nil {
-		t.deploy.log.Error(err)
+		t.log.Error(err)
 		global.GinerateError(context, global.InternalServerError(err))
 		return
 	}
@@ -82,7 +84,7 @@ func (t *DeploymentController) CreateDeployment(context *gin.Context) {
 
 	err := t.deploy.CreateDeployment(&deployment)
 	if err != nil {
-		t.deploy.log.Error(err)
+		t.log.Error(err)
 		global.GinerateError(context, global.InternalServerError(err))
 		return
 	}

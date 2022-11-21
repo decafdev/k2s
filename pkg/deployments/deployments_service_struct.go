@@ -3,17 +3,22 @@ package deployments
 import (
 	"fmt"
 
-	"github.com/sirupsen/logrus"
 	"github.com/techdecaf/k2s/v2/pkg/kube"
 	v1 "k8s.io/api/core/v1"
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // NewDeploymentService function description
-func NewDeploymentService(k8s *kube.Service, log *logrus.Entry) *DeploymentService {
+func NewDeploymentService(k8s *kube.Service) DeploymentSrv {
 	return &DeploymentService{k8s: k8s, labels: CommonLabels{
 		CreatedBy: "k2s-operator",
 	}}
+}
+
+type DeploymentSrv interface {
+	CreateDeployment(spec *DeploymentDTO) error
+	ListNamespaces() ([]v1.Namespace, error)
+	ListDeployments() ([]DeploymentStatus, error)
 }
 
 // CommonLabels struct
@@ -26,7 +31,6 @@ type DeploymentService struct {
 	labels CommonLabels
 	// table *DeploymentsTable
 	k8s *kube.Service
-	log *logrus.Entry
 }
 
 // CreateDeployment method
@@ -44,7 +48,7 @@ func (t *DeploymentService) CreateDeployment(spec *DeploymentDTO) error {
 		CreatedBy:   t.labels.CreatedBy,
 	})
 	if err != nil {
-		t.log.Error(err)
+		return err
 	}
 
 	return application.Apply(t.k8s)
