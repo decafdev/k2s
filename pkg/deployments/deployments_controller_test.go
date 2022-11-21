@@ -35,8 +35,7 @@ func TestDeploymentsController(t *testing.T) {
 	testPost := make(map[string]given)
 
 	depl := &state.DeploymentDTO{Name: "whoami", Image: "traefik/whoami", Version: "1.0.0"}
-	values := map[string]string{"name": "whoami", "image": "traefik/whoami", "version": "1.0.0"}
-	json_data, err := json.Marshal(values)
+	json_data, err := json.Marshal(depl)
 	require.NoError(t, err)
 
 	testPost["when I make a proper POST request to create a deployment"] = given{
