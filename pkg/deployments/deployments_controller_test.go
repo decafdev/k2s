@@ -23,10 +23,10 @@ var SERVICE_NAME = "k2s-operator"
 
 func TestDeploymentsController(t *testing.T) {
 	type given struct {
-		method        string
-		url           string
-		body          []byte
-		expectations  func(srv *mock_depl_srv.MockDeploymentSrv)
+		method       string
+		url          string
+		body         []byte
+		expectations func(srv *mock_depl_srv.MockDeploymentSrv)
 	}
 
 	testPost := make(map[string]given)
