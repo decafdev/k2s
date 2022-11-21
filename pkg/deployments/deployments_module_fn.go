@@ -14,12 +14,12 @@ func Module(app *gin.Engine, k8s *kube.Service, logger *logrus.Entry) {
 	// 	log.Fatal(err)
 	// }
 
-	deploymentService := NewDeploymentService(k8s, log)
+	deploymentService := NewDeploymentService(k8s)
 	// if err := deploymentService.OnModuleInit(); err != nil {
 	// 	log.Fatal(err)
 	// }
 
-	NewDeploymentController(app, deploymentService)
+	NewDeploymentController(app, deploymentService, log)
 
 	log.Info("deployments module loaded")
 }
