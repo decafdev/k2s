@@ -2,26 +2,43 @@
 
 [![Discord](https://badgen.net/badge/icon/discord?icon=discord&label)](https://discord.com/channels/929003936709509160/1038103432378187776)
 
+K2s enables staggeringly simple and opinionated Kubernetes deployments.
+
 ## Objectives
 
-1. Eliminate the need for kubernetes specific knowledge when deploying api & event driven services
-2. Provide a simple mechanism for cluster admission control improving the overall security posture
+1. Eliminate the need for Kubernetes-specific specific knowledge when deploying API & event-driven services
+2. Provide a simple mechanism for cluster admission control, improving the overall security posture
 
 ## Key Results
 
-- A first time user can create their first k2s deployment in under 5 minutes without any prior kubernetes experience.
+- A first-time user can create their first k2s deployment in under 5 minutes without any prior Kubernetes experience.
 
 ## Features
 
 - [ ] support the use of a private registry
-- [ ] support api deployments
+- [ ] support API deployments
 
-## Set me up!
+## Setup and teardown
 
 ### Get a k8s cluster up and running
-1. `go install sigs.k8s.io/kind@v0.17.0 && kind create cluster --config ./kind-config.yml --name local`
-2. Start docker `docker compose up -d`
-2. Start k2s `go run .`
+
+1. Install KIND `brew install kind`
+2. Create cluster `kind create cluster --config ./kind-config.yml --name local`
+3. Start k2s `go run . serve` (`go run . -h` for help)
+
+After you deploy your service, you access it via local port 32080. Traefik is the ingress. You access Traefik's dashboard via local port 32088.
+
+### Teardown
+
+If you want to tear your cluster down, `kind delete` doesn't seem to work very reliably, and we don't currently implement anything nicer. So:
+
+First, change your Kubernetes context to something other than `kind-local`. Next, delete the `kind-local` context with `kubectl config delete-context kind-local`. Finally, run:
+
+```sh
+docker stop local-control-plane && docker rm local-control-plane
+docker stop local-worker && docker rm local-worker
+docker stop local-worker2 && docker rm local-worker2
+```
 
 ## Configuration Options
 
@@ -33,11 +50,11 @@
 
 ## Endpoints
 
-create a new immutable deployment of the specified type
+Create a new immutable deployment of the specified type
 
 > POST:/deployments
 
-list all deployments
+List all deployments
 
 > GET:/deployments
 
@@ -48,4 +65,3 @@ List all deployments for a specific service
 Get deployment details for a specific version
 
 > GET:/deployments/:name/:version
-
