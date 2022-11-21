@@ -6,7 +6,6 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
-	"os"
 	"testing"
 
 	"github.com/gin-gonic/gin"
@@ -58,12 +57,7 @@ func TestDeploymentsController(t *testing.T) {
 			given.expectations(srv)
 
 			// TODO: abstract/mock over next few lines
-			os.Setenv("SERVICE_NAME", SERVICE_NAME)
-			os.Setenv("VERSION", VERSION)
-
-			configService, err := config.NewConfigService(os.Environ()...).Validate()
-			require.NoError(t, err)
-			log := logger.NewLogger(configService)
+			log := logger.NewLogger(&config.ConfigService{})
 			l := log.WithFields(logrus.Fields{"module": "deployments"})
 			//
 
