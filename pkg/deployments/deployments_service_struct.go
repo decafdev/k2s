@@ -12,7 +12,7 @@ import (
 
 // NewDeploymentService function description
 func NewDeploymentService(k8s *kube.Service, log *logrus.Entry) *DeploymentService {
-	return &DeploymentService{k8s: k8s, labels: CommonLabels{
+	return &DeploymentService{k8s: k8s, log: log, labels: CommonLabels{
 		CreatedBy: "k2s-operator",
 	}}
 }
@@ -45,7 +45,7 @@ func (t *DeploymentService) CreateDeployment(spec *state.DeploymentDTO) error {
 		CreatedBy:   t.labels.CreatedBy,
 	})
 	if err != nil {
-		t.log.Error(err)
+		return err
 	}
 
 	return application.Apply(t.k8s)
