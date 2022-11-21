@@ -5,7 +5,6 @@ import (
 
 	"github.com/sirupsen/logrus"
 	"github.com/techdecaf/k2s/v2/pkg/kube"
-	"github.com/techdecaf/k2s/v2/pkg/state"
 	v1 "k8s.io/api/core/v1"
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -25,13 +24,13 @@ type CommonLabels struct {
 // DeploymentService struct
 type DeploymentService struct {
 	labels CommonLabels
-	// table *state.DeploymentsTable
+	// table *DeploymentsTable
 	k8s *kube.Service
 	log *logrus.Entry
 }
 
 // CreateDeployment method
-func (t *DeploymentService) CreateDeployment(spec *state.DeploymentDTO) error {
+func (t *DeploymentService) CreateDeployment(spec *DeploymentDTO) error {
 	application, err := kube.NewAPIApplication(&kube.APIOptions{
 		Name:        spec.Name,
 		Image:       spec.Image,
@@ -62,8 +61,8 @@ func (t *DeploymentService) ListNamespaces() ([]v1.Namespace, error) {
 }
 
 // ListDeployments method
-func (t *DeploymentService) ListDeployments() ([]state.DeploymentStatus, error) {
-	deployments := []state.DeploymentStatus{}
+func (t *DeploymentService) ListDeployments() ([]DeploymentStatus, error) {
+	deployments := []DeploymentStatus{}
 	namespaces, err := t.ListNamespaces()
 	if err != nil {
 		return nil, err
@@ -78,7 +77,7 @@ func (t *DeploymentService) ListDeployments() ([]state.DeploymentStatus, error) 
 		}
 
 		for _, deployment := range list.Items {
-			deployments = append(deployments, state.DeploymentStatus{
+			deployments = append(deployments, DeploymentStatus{
 				Name:      deployment.Name,
 				Namespace: namespace.Name,
 				Image:     deployment.Spec.Template.Spec.Containers[0].Image,
