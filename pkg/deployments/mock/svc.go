@@ -8,7 +8,7 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
-	state "github.com/techdecaf/k2s/v2/pkg/state"
+	deployments "github.com/techdecaf/k2s/v2/pkg/deployments"
 	v1 "k8s.io/api/core/v1"
 )
 
@@ -36,7 +36,7 @@ func (m *MockDeploymentSrv) EXPECT() *MockDeploymentSrvMockRecorder {
 }
 
 // CreateDeployment mocks base method.
-func (m *MockDeploymentSrv) CreateDeployment(arg0 *state.DeploymentDTO) error {
+func (m *MockDeploymentSrv) CreateDeployment(arg0 *deployments.DeploymentDTO) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateDeployment", arg0)
 	ret0, _ := ret[0].(error)
@@ -50,10 +50,10 @@ func (mr *MockDeploymentSrvMockRecorder) CreateDeployment(arg0 interface{}) *gom
 }
 
 // ListDeployments mocks base method.
-func (m *MockDeploymentSrv) ListDeployments() ([]state.DeploymentStatus, error) {
+func (m *MockDeploymentSrv) ListDeployments() ([]deployments.DeploymentStatus, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ListDeployments")
-	ret0, _ := ret[0].([]state.DeploymentStatus)
+	ret0, _ := ret[0].([]deployments.DeploymentStatus)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

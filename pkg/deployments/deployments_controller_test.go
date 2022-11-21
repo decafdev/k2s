@@ -16,7 +16,6 @@ import (
 	"github.com/techdecaf/k2s/v2/pkg/deployments"
 	mock_depl_srv "github.com/techdecaf/k2s/v2/pkg/deployments/mock"
 	"github.com/techdecaf/k2s/v2/pkg/logger"
-	"github.com/techdecaf/k2s/v2/pkg/state"
 )
 
 var VERSION = "0.0.0"
@@ -32,7 +31,7 @@ func TestDeploymentsController(t *testing.T) {
 
 	testPost := make(map[string]given)
 
-	depl := &state.DeploymentDTO{Name: "whoami", Image: "traefik/whoami", Version: "1.0.0"}
+	depl := &deployments.DeploymentDTO{Name: "whoami", Image: "traefik/whoami", Version: "1.0.0", Port: "80"}
 	json_data, err := json.Marshal(depl)
 	require.NoError(t, err)
 
@@ -68,8 +67,8 @@ func TestDeploymentsController(t *testing.T) {
 
 			// setup request
 			context.Request, err = http.NewRequest(given.method, given.url, bytes.NewBuffer(given.body))
-			context.Request.Header.Set("Content-Type", "application/json")
 			require.NoError(t, err)
+			context.Request.Header.Set("Content-Type", "application/json")
 
 			// send request and check response
 			app.ServeHTTP(res, context.Request)
@@ -79,11 +78,11 @@ func TestDeploymentsController(t *testing.T) {
 	}
 }
 
-func requireBodyMatch(t *testing.T, depl *state.DeploymentDTO, body *bytes.Buffer) {
+func requireBodyMatch(t *testing.T, depl *deployments.DeploymentDTO, body *bytes.Buffer) {
 	bytes, err := io.ReadAll(body)
 	require.NoError(t, err)
 
-	var actual *state.DeploymentDTO
+	var actual *deployments.DeploymentDTO
 	err = json.Unmarshal(bytes, &actual)
 	require.NoError(t, err)
 	require.Equal(t, depl, actual)

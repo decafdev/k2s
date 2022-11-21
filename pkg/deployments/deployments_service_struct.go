@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/techdecaf/k2s/v2/pkg/kube"
-	"github.com/techdecaf/k2s/v2/pkg/state"
 	v1 "k8s.io/api/core/v1"
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -17,9 +16,9 @@ func NewDeploymentService(k8s *kube.Service) DeploymentSrv {
 }
 
 type DeploymentSrv interface {
-	CreateDeployment(spec *state.DeploymentDTO) error
+	CreateDeployment(spec *DeploymentDTO) error
 	ListNamespaces() ([]v1.Namespace, error)
-	ListDeployments() ([]state.DeploymentStatus, error)
+	ListDeployments() ([]DeploymentStatus, error)
 }
 
 // CommonLabels struct
@@ -35,7 +34,7 @@ type DeploymentService struct {
 }
 
 // CreateDeployment method
-func (t *DeploymentService) CreateDeployment(spec *state.DeploymentDTO) error {
+func (t *DeploymentService) CreateDeployment(spec *DeploymentDTO) error {
 	application, err := kube.NewAPIApplication(&kube.APIOptions{
 		Name:        spec.Name,
 		Image:       spec.Image,
@@ -66,8 +65,8 @@ func (t *DeploymentService) ListNamespaces() ([]v1.Namespace, error) {
 }
 
 // ListDeployments method
-func (t *DeploymentService) ListDeployments() ([]state.DeploymentStatus, error) {
-	deployments := []state.DeploymentStatus{}
+func (t *DeploymentService) ListDeployments() ([]DeploymentStatus, error) {
+	deployments := []DeploymentStatus{}
 	namespaces, err := t.ListNamespaces()
 	if err != nil {
 		return nil, err
@@ -82,7 +81,7 @@ func (t *DeploymentService) ListDeployments() ([]state.DeploymentStatus, error) 
 		}
 
 		for _, deployment := range list.Items {
-			deployments = append(deployments, state.DeploymentStatus{
+			deployments = append(deployments, DeploymentStatus{
 				Name:      deployment.Name,
 				Namespace: namespace.Name,
 				Image:     deployment.Spec.Template.Spec.Containers[0].Image,
