@@ -15,6 +15,7 @@ func NewDeploymentController(app *gin.Engine, deploymentSvc *DeploymentService) 
 	router := app.Group("/deployments")
 
 	router.GET("", controller.ListDeployments)
+	router.GET("/:name/:version", controller.GetDeployment)
 	router.POST("", controller.CreateDeployment)
 	// router.DELETE("/:id", controller.DeleteDeployment)
 
@@ -34,17 +35,29 @@ type DeploymentController struct {
 // @Router /deployments [GET]
 // ListDeployments method
 func (t *DeploymentController) ListDeployments(context *gin.Context) {
-	// var deployment DeploymentDTO
-
-	// if err := context.ShouldBind(&deployment); err != nil {
-	// 	global.GinerateError(context, global.BadRequestError(err))
-	// 	return
-	// }
-
 	res, err := t.deploy.ListDeployments()
 	if err != nil {
 		t.deploy.log.Error(err)
-		global.GinerateError(context, global.InternalServerError(err))
+		global.GinError(context, global.InternalServerError(err))
+		return
+	}
+
+	context.JSON(http.StatusOK, res)
+}
+
+// @Summary get a single deployed service
+// @Description get a single deployed service
+// @Accept application/json
+// @Produce json
+// @Success 200 {object} map[string]string true
+// @Router /deployments/name/version [GET]
+// ListDeployments method
+func (t *DeploymentController) GetDeployment(context *gin.Context) {
+	res, err := t.deploy.GetDeployment(context.Param("name"), context.Param("version"))
+
+	if err != nil {
+		t.deploy.log.Error(err)
+		global.GinError(context, global.InternalServerError(err))
 		return
 	}
 
@@ -76,14 +89,14 @@ func (t *DeploymentController) CreateDeployment(context *gin.Context) {
 	var deployment DeploymentDTO
 
 	if err := context.ShouldBind(&deployment); err != nil {
-		global.GinerateError(context, global.BadRequestError(err))
+		global.GinError(context, global.BadRequestError(err))
 		return
 	}
 
 	err := t.deploy.CreateDeployment(&deployment)
 	if err != nil {
 		t.deploy.log.Error(err)
-		global.GinerateError(context, global.InternalServerError(err))
+		global.GinError(context, global.InternalServerError(err))
 		return
 	}
 

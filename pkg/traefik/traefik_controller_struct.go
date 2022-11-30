@@ -34,7 +34,7 @@ type TraefikController struct {
 func (t *TraefikController) GetConfig(context *gin.Context) {
 	config, err := t.traefik.GetTraefikConfig()
 	if err != nil {
-		global.GinerateError(context, global.KubeError(err))
+		global.GinError(context, global.KubeError(err))
 		return
 	}
 	context.JSON(http.StatusOK, config["traefik-middlewares.json"])

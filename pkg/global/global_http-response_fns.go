@@ -47,7 +47,7 @@ func KubeError(err error) *ApplicationError {
 	return InternalServerError(errors.New("unknown error"))
 }
 
-func GinerateError(context *gin.Context, err *ApplicationError) *gin.Context {
+func GinError(context *gin.Context, err *ApplicationError) *gin.Context {
 	context.JSON(err.Code, err)
 	context.AbortWithError(err.Code, err._error)
 	return context

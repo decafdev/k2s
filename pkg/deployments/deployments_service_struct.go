@@ -1,8 +1,6 @@
 package deployments
 
 import (
-	"fmt"
-
 	"github.com/sirupsen/logrus"
 	"github.com/techdecaf/k2s/v2/pkg/kube"
 	v1 "k8s.io/api/core/v1"
@@ -11,20 +9,11 @@ import (
 
 // NewDeploymentService function description
 func NewDeploymentService(k8s *kube.Service, log *logrus.Entry) *DeploymentService {
-	return &DeploymentService{k8s: k8s, labels: CommonLabels{
-		CreatedBy: "k2s-operator",
-	}}
-}
-
-// CommonLabels struct
-type CommonLabels struct {
-	CreatedBy string
+	return &DeploymentService{k8s: k8s}
 }
 
 // DeploymentService struct
 type DeploymentService struct {
-	labels CommonLabels
-	// table *DeploymentsTable
 	k8s *kube.Service
 	log *logrus.Entry
 }
@@ -41,8 +30,8 @@ func (t *DeploymentService) CreateDeployment(spec *DeploymentDTO) error {
 		CPULimit:    0,
 		Variables:   map[string]string{},
 		Middlewares: []string{},
-		CreatedBy:   t.labels.CreatedBy,
 	})
+
 	if err != nil {
 		t.log.Error(err)
 	}
@@ -54,8 +43,9 @@ func (t *DeploymentService) CreateDeployment(spec *DeploymentDTO) error {
 
 // ListNamespaces method
 func (t *DeploymentService) ListNamespaces() ([]v1.Namespace, error) {
+
 	res, err := t.k8s.ListNamespaces(metaV1.ListOptions{
-		LabelSelector: fmt.Sprintf("%s=%s", "created-by", t.labels.CreatedBy),
+		LabelSelector: kube.CreatedBySelector,
 	})
 	return res.Items, err
 }
@@ -70,24 +60,63 @@ func (t *DeploymentService) ListDeployments() ([]DeploymentStatus, error) {
 
 	for _, namespace := range namespaces {
 		list, err := t.k8s.ListDeployments(namespace.Name, metaV1.ListOptions{
-			LabelSelector: fmt.Sprintf("%s=%s", "created-by", t.labels.CreatedBy),
+			LabelSelector: kube.CreatedBySelector,
 		})
 		if err != nil {
 			return nil, err
 		}
 
 		for _, deployment := range list.Items {
+			labels := kube.NewLabels().FromMap(deployment.Labels)
+
 			deployments = append(deployments, DeploymentStatus{
+				Id:        labels.Id,
 				Name:      deployment.Name,
 				Namespace: namespace.Name,
 				Image:     deployment.Spec.Template.Spec.Containers[0].Image,
-				Version:   deployment.Labels["version"],
+				Version:   labels.Version,
 				Status:    deployment.Status,
 			})
 		}
 
 	}
 	return deployments, nil
+}
+
+// GetDeployment method
+func (t *DeploymentService) GetDeployment(name, version string) (DeploymentStatus, error) {
+	var status DeploymentStatus
+
+	// application, err := kube.NewAPIApplication(&kube.APIOptions{
+	// 	Name:    name,
+	// 	Version: version,
+	// })
+
+	// if err != nil {
+	// 	return DeploymentStatus{}, err
+	// }
+
+	// list, err := t.k8s.ListDeployments(application.Namespace.Name, metaV1.ListOptions{
+	// 	LabelSelector: kube.CreatedBySelector,
+	// })
+	// if err != nil {
+	// 	return DeploymentStatus{}, err
+	// }
+
+	// for _, deployment := range list.Items {
+	// 	labels := kube.NewLabels().FromMap(deployment.Labels)
+
+	// 	status = DeploymentStatus{
+	// 		Id:        labels.Id,
+	// 		Name:      deployment.Name,
+	// 		Namespace: application.Namespace.Name,
+	// 		Image:     deployment.Spec.Template.Spec.Containers[0].Image,
+	// 		Version:   labels.Version,
+	// 		Status:    deployment.Status,
+	// 	}
+	// }
+
+	return status, nil
 }
 
 // DeleteDeployment method

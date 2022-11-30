@@ -8,6 +8,7 @@ import (
 	"github.com/Masterminds/semver"
 	"github.com/go-playground/mold/v4/modifiers"
 	"github.com/go-playground/validator/v10"
+
 	appsV1 "k8s.io/api/apps/v1"
 	coreV1 "k8s.io/api/core/v1"
 	netV1 "k8s.io/api/networking/v1"
@@ -28,13 +29,17 @@ type APIOptions struct {
 	CPULimit    int64  `mod:"default=500"`
 	Variables   map[string]string
 	Middlewares []string `validate:"unique,dive,required,endswith=@file" mod:"lcase"`
-	CreatedBy   string
+	labels      Labels
 }
 
 func (t *APIOptions) Validate() (*APIOptions, error) {
 	if err := modifiers.New().Struct(context.Background(), t); err != nil {
 		return t, err
 	}
+
+	t.labels.Name = t.Name
+	t.labels.Version = t.Version
+
 	return t, validator.New().Struct(t)
 }
 
@@ -49,7 +54,6 @@ type APIResources struct {
 
 // Apply method
 func (t *APIResources) Apply(client *Service) (err error) {
-	// TODO: actually apply
 	client.ApplyNamespace(t.Namespace)
 	client.ApplyService(t.Service.ObjectMeta.Namespace, t.Service)
 	client.ApplySecret(t.Secret.ObjectMeta.Namespace, t.Secret)
@@ -81,14 +85,13 @@ func NewAPIApplication(o *APIOptions) (*APIResources, error) {
 		return &APIResources{}, err
 	}
 
+	resourceLabels := o.labels.ResourceLabels()
+	deploymentLabels := o.labels.ToMap([]string{})
+
 	metadata := metaV1.ObjectMeta{
 		Name:      o.Name,
 		Namespace: fmt.Sprintf("%s-v%v", o.Name, version.Major()),
-		Labels: map[string]string{
-			"app.kubernetes.io/name": o.Name,
-			"created-by":             o.CreatedBy,
-			"version":                version.String(),
-		},
+		Labels:    resourceLabels,
 	}
 
 	namespace := &coreV1.Namespace{
@@ -110,7 +113,7 @@ func NewAPIApplication(o *APIOptions) (*APIResources, error) {
 		ObjectMeta: metaV1.ObjectMeta{
 			Name:      fmt.Sprintf("%s.%s", o.Name, o.Version),
 			Namespace: namespace.ObjectMeta.Name,
-			Labels:    metadata.Labels,
+			Labels:    deploymentLabels,
 		},
 		StringData: o.Variables,
 	}
@@ -162,9 +165,7 @@ func NewAPIApplication(o *APIOptions) (*APIResources, error) {
 				Ports: []coreV1.ServicePort{
 					{Name: "http", Protocol: "TCP", Port: o.Port},
 				},
-				Selector: map[string]string{
-					"app.kubernetes.io/name": metadata.Name,
-				},
+				Selector: resourceLabels,
 			},
 		},
 		Deployment: &appsV1.Deployment{
@@ -172,13 +173,15 @@ func NewAPIApplication(o *APIOptions) (*APIResources, error) {
 				APIVersion: "apps/v1",
 				Kind:       "Deployment",
 			},
-			ObjectMeta: metadata,
+			ObjectMeta: metaV1.ObjectMeta{
+				Name:      metadata.Name,
+				Namespace: namespace.ObjectMeta.Name,
+				Labels:    deploymentLabels,
+			},
 			Spec: appsV1.DeploymentSpec{
 				Replicas: tx.Int32ToPtr(o.Replicas),
 				Selector: &metaV1.LabelSelector{
-					MatchLabels: map[string]string{
-						"app.kubernetes.io/name": metadata.Name,
-					},
+					MatchLabels: resourceLabels,
 				},
 				Strategy: appsV1.DeploymentStrategy{
 					Type: "RollingUpdate",
@@ -192,7 +195,11 @@ func NewAPIApplication(o *APIOptions) (*APIResources, error) {
 					},
 				},
 				Template: coreV1.PodTemplateSpec{
-					ObjectMeta: metadata,
+					ObjectMeta: metaV1.ObjectMeta{
+						Name:      metadata.Name,
+						Namespace: namespace.ObjectMeta.Name,
+						Labels:    deploymentLabels,
+					},
 					Spec: coreV1.PodSpec{
 						Containers: []coreV1.Container{
 							{
