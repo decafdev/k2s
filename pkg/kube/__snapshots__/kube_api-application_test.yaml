@@ -4,8 +4,8 @@ kind: Namespace
 metadata:
   creationTimestamp: null
   labels:
-    k2s.techdecaf.io/created-by: k2s-operator
     k2s.techdecaf.io/name: whoami
+    k2s.techdecaf.io/created-by: "k2s-operator"
   name: whoami-v1
 spec: {}
 status: {}

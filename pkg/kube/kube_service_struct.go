@@ -18,18 +18,10 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 )
 
-// ClientInterface - interface
-type ClientInterface interface {
-	ApplyDeploymentSpec(namespace string, deployment *appsV1.Deployment) (*appsV1.Deployment, error)
-}
-
-// NewKubeService function description
-func NewKubeService() (*Service, error) {
-	client := &Service{
-		ctx: context.Background(),
-	}
-	return client.Connect()
-}
+// // ClientInterface - interface
+// type ClientInterface interface {
+// 	ApplyDeploymentSpec(namespace string, deployment *appsV1.Deployment) (*appsV1.Deployment, error)
+// }
 
 // Service struct
 type Service struct {
@@ -40,40 +32,12 @@ type Service struct {
 	ctx context.Context
 }
 
-// // ApplyCRD method
-// func (t *Client) ApplyCRD(crd *apiExtV1Beta1.CustomResourceDefinition) (*apiExtV1Beta1.CustomResourceDefinition, error) {
-// 	create := t.ext.ApiextensionsV1beta1().CustomResourceDefinitions().Create
-// 	update := t.ext.ApiextensionsV1beta1().CustomResourceDefinitions().Update
-
-// 	if res, err := create(t.ctx, crd, metaV1.CreateOptions{}); apierrors.IsAlreadyExists(err) {
-// 		return update(t.ctx, crd, metaV1.UpdateOptions{})
-// 	} else {
-// 		return res, err
-// 	}
-// }
-
-// ApplySecret method
-func (t *Service) ApplySecret(namespace string, spec *coreV1.Secret) (*coreV1.Secret, error) {
-	create := t.k8s.CoreV1().Secrets(namespace).Create
-	update := t.k8s.CoreV1().Secrets(namespace).Update
-
-	res, err := create(t.ctx, spec, metaV1.CreateOptions{})
-	if apierrors.IsAlreadyExists(err) {
-		return update(t.ctx, spec, metaV1.UpdateOptions{})
+// NewKubeService function description
+func NewKubeService() (*Service, error) {
+	client := &Service{
+		ctx: context.Background(),
 	}
-
-	return res, err
-
-}
-
-// GetSecret method
-func (t *Service) GetSecret(name, namespace string) (*coreV1.Secret, error) {
-	return t.k8s.CoreV1().Secrets(namespace).Get(t.ctx, name, metaV1.GetOptions{})
-}
-
-// ListSecrets method
-func (t *Service) ListSecrets(namespace string) (*coreV1.SecretList, error) {
-	return t.k8s.CoreV1().Secrets(namespace).List(t.ctx, metaV1.ListOptions{})
+	return client.Connect()
 }
 
 // OnNamespaceEvent method
@@ -120,6 +84,85 @@ func (t *Service) OnDeploymentEvent(name, namespace, release string) rxgo.Observ
 	}})
 }
 
+// // ApplyCRD method
+// func (t *Client) ApplyCRD(crd *apiExtV1Beta1.CustomResourceDefinition) (*apiExtV1Beta1.CustomResourceDefinition, error) {
+// 	create := t.ext.ApiextensionsV1beta1().CustomResourceDefinitions().Create
+// 	update := t.ext.ApiextensionsV1beta1().CustomResourceDefinitions().Update
+
+// 	if res, err := create(t.ctx, crd, metaV1.CreateOptions{}); apierrors.IsAlreadyExists(err) {
+// 		return update(t.ctx, crd, metaV1.UpdateOptions{})
+// 	} else {
+// 		return res, err
+// 	}
+// }
+
+// CreateRegistrySecret method
+func (t *Service) CreateRegistrySecret(o *CreateRegistryDTO) (*coreV1.Secret, error) {
+	registry, err := NewContainerRegistry(&ContainerRegistryOptions{
+		Name:      o.Name,
+		Namespace: o.Namespace,
+		Registry:  o.Registry,
+		Username:  o.Username,
+		Password:  o.Password,
+	})
+
+	if err != nil {
+		return &coreV1.Secret{}, err
+	}
+
+	registry.Secret.ObjectMeta.Labels = map[string]string{
+		"secret-type": "private-registry",
+	}
+
+	return t.ApplySecret(o.Namespace, registry.Secret)
+}
+
+// ApplySecret method
+func (t *Service) ApplySecret(namespace string, spec *coreV1.Secret) (*coreV1.Secret, error) {
+	create := t.k8s.CoreV1().Secrets(namespace).Create
+	update := t.k8s.CoreV1().Secrets(namespace).Update
+
+	res, err := create(t.ctx, spec, metaV1.CreateOptions{})
+	if apierrors.IsAlreadyExists(err) {
+		return update(t.ctx, spec, metaV1.UpdateOptions{})
+	}
+
+	return res, err
+}
+
+// GetSecret method
+func (t *Service) GetSecret(name, namespace string) (*coreV1.Secret, error) {
+	return t.k8s.CoreV1().Secrets(namespace).Get(t.ctx, name, metaV1.GetOptions{})
+}
+
+// ListSecrets method
+func (t *Service) ListSecrets(namespace string) (*coreV1.SecretList, error) {
+	return t.k8s.CoreV1().Secrets(namespace).List(t.ctx, metaV1.ListOptions{})
+}
+
+// CopySecret method
+func (t *Service) CopyRegistry(name, fromNamespace, toNamespace string) (registry *coreV1.Secret, err error) {
+	source, err := t.GetSecret(name, fromNamespace)
+	if err != nil {
+		return registry, err
+	}
+
+	destinationCopy, err := t.ApplySecret(toNamespace, &coreV1.Secret{
+		ObjectMeta: metaV1.ObjectMeta{
+			Name:      source.ObjectMeta.Name,
+			Namespace: toNamespace,
+			Labels:    source.ObjectMeta.Labels,
+		},
+		Data: source.Data,
+	})
+
+	if err != nil {
+		return registry, err
+	}
+
+	return destinationCopy, nil
+}
+
 // ApplyDeployment method
 func (t *Service) ApplyDeployment(namespace string, spec *appsV1.Deployment) (*appsV1.Deployment, error) {
 	create := t.k8s.AppsV1().Deployments(namespace).Create
@@ -138,11 +181,6 @@ func (t *Service) ListDeployments(namespace string, options metaV1.ListOptions) 
 	return t.k8s.AppsV1().Deployments(namespace).List(t.ctx, options)
 }
 
-// ListNamespaces method
-func (t *Service) ListNamespaces(options metaV1.ListOptions) (*coreV1.NamespaceList, error) {
-	return t.k8s.CoreV1().Namespaces().List(t.ctx, options)
-}
-
 // ApplyIngress method
 func (t *Service) ApplyIngress(namespace string, spec *netV1.Ingress) (*netV1.Ingress, error) {
 	create := t.k8s.NetworkingV1().Ingresses(namespace).Create
@@ -153,11 +191,6 @@ func (t *Service) ApplyIngress(namespace string, spec *netV1.Ingress) (*netV1.In
 		return update(t.ctx, spec, metaV1.UpdateOptions{})
 	}
 	return res, err
-}
-
-// GetConfigMap method
-func (t *Service) GetConfigMap(name, namespace string) (*coreV1.ConfigMap, error) {
-	return t.k8s.CoreV1().ConfigMaps(namespace).Get(t.ctx, name, metaV1.GetOptions{})
 }
 
 // ApplyConfigMap method
@@ -173,9 +206,19 @@ func (t *Service) ApplyConfigMap(namespace string, spec *coreV1.ConfigMap) (*cor
 	return res, err
 }
 
+// GetConfigMap method
+func (t *Service) GetConfigMap(name, namespace string) (*coreV1.ConfigMap, error) {
+	return t.k8s.CoreV1().ConfigMaps(namespace).Get(t.ctx, name, metaV1.GetOptions{})
+}
+
 // ApplyNamespace method
 func (t *Service) ApplyNamespace(namespace *coreV1.Namespace) (*coreV1.Namespace, error) {
 	return t.k8s.CoreV1().Namespaces().Create(t.ctx, namespace, metaV1.CreateOptions{})
+}
+
+// ListNamespaces method
+func (t *Service) ListNamespaces(options metaV1.ListOptions) (*coreV1.NamespaceList, error) {
+	return t.k8s.CoreV1().Namespaces().List(t.ctx, options)
 }
 
 // ApplyService method
@@ -220,12 +263,6 @@ func (t *Service) ApplyClusterRoleBinding(spec *rbacV1.ClusterRoleBinding) (*rba
 	return res, err
 }
 
-// // CreateServiceAccount method
-// func (t *Service) CreateServiceAccount(namespace string, spec *coreV1.ServiceAccount) (*coreV1.ServiceAccount, error) {
-// 	create := t.k8s.CoreV1().ServiceAccounts(namespace).Create
-// 	return create(t.ctx, spec, metaV1.CreateOptions{})
-// }
-
 // ApplyServiceAccount method
 func (t *Service) ApplyServiceAccount(namespace string, spec *coreV1.ServiceAccount) (*coreV1.ServiceAccount, error) {
 	create := t.k8s.CoreV1().ServiceAccounts(namespace).Create
@@ -237,50 +274,6 @@ func (t *Service) ApplyServiceAccount(namespace string, spec *coreV1.ServiceAcco
 	}
 
 	return res, err
-}
-
-// CopySecret method
-func (t *Service) CopyRegistry(name, fromNamespace, toNamespace string) (registry *coreV1.Secret, err error) {
-	source, err := t.GetSecret(name, fromNamespace)
-	if err != nil {
-		return registry, err
-	}
-
-	destinationCopy, err := t.ApplySecret(toNamespace, &coreV1.Secret{
-		ObjectMeta: metaV1.ObjectMeta{
-			Name:      source.ObjectMeta.Name,
-			Namespace: toNamespace,
-			Labels:    source.ObjectMeta.Labels,
-		},
-		Data: source.Data,
-	})
-
-	if err != nil {
-		return registry, err
-	}
-
-	return destinationCopy, nil
-}
-
-// CreateRegistrySecret method
-func (t *Service) CreateRegistrySecret(o *CreateRegistryDTO) (*coreV1.Secret, error) {
-	registry, err := NewContainerRegistry(&ContainerRegistryOptions{
-		Name:      o.Name,
-		Namespace: o.Namespace,
-		Registry:  o.Registry,
-		Username:  o.Username,
-		Password:  o.Password,
-	})
-
-	if err != nil {
-		return &coreV1.Secret{}, err
-	}
-
-	registry.Secret.ObjectMeta.Labels = map[string]string{
-		"secret-type": "private-registry",
-	}
-
-	return t.ApplySecret(o.Namespace, registry.Secret)
 }
 
 // Connect method

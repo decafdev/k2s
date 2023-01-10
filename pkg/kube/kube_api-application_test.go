@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/techdecaf/k2s/v2/pkg/kube"
 )
 
@@ -12,9 +12,7 @@ func TestNewAPIApplication(t *testing.T) {
 	// s := json.NewYAMLSerializer(json.DefaultMetaFactory, scheme.Scheme, scheme.Scheme)
 	// given struct
 	type given struct {
-		input  *kube.APIOptions
-		expect kube.APIResources
-		err    string
+		input *kube.APIOptions
 	}
 
 	scenario := make(map[string]given)
@@ -42,23 +40,17 @@ func TestNewAPIApplication(t *testing.T) {
 
 	for when, given := range scenario {
 		t.Run(when, func(t *testing.T) {
-			r, err := kube.NewAPIApplication(given.input)
+			resources, err := kube.NewAPIApplication(given.input)
+			require.NoError(t, err)
 
-			if (err != nil) && (given.err != err.Error()) {
-				t.Log(err.Error())
-				t.Errorf("unexpected error with [%s]", err.Error())
-				return
-			}
-			yaml, err := r.ToYAML()
-			if err != nil {
-				t.Error(err)
-			}
+			yaml, err := resources.ToYAML()
+			require.NoError(t, err)
+
 			// os.WriteFile("./__snapshots__/kube_api-application_test.yaml", yaml, 0644)
 			snap, err := os.ReadFile("./__snapshots__/kube_api-application_test.yaml")
-			if err != nil {
-				t.Error(err)
-			}
-			assert.YAMLEq(t, string(snap), string(yaml))
+			require.NoError(t, err)
+
+			require.YAMLEq(t, string(snap), string(yaml))
 		})
 	}
 }
