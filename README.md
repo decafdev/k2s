@@ -23,22 +23,21 @@ K2s enables staggeringly simple and opinionated Kubernetes deployments.
 ### Get a k8s cluster up and running
 
 1. Install KIND `brew install kind`
-2. Create cluster `kind create cluster --config ./kind-config.yml --name local`
-3. Start k2s `go run . serve` (`go run . -h` for help)
+2. Create cluster `kind create cluster --config ./kind-config.yml -n local`
+3. Start k2s `go run . start` (`go run . -h` for help)
 
 After you deploy your service, you access it via local port 32080. Traefik is the ingress. You access Traefik's dashboard via local port 32088.
 
 ### Teardown
 
-If you want to tear your cluster down, `kind delete` doesn't seem to work very reliably, and we don't currently implement anything nicer. So:
+If you want to delete the k2s-operator resources (better commands to come):
 
-First, change your Kubernetes context to something other than `kind-local`. Next, delete the `kind-local` context with `kubectl config delete-context kind-local`. Finally, run:
-
-```sh
-docker stop local-control-plane && docker rm local-control-plane
-docker stop local-worker && docker rm local-worker
-docker stop local-worker2 && docker rm local-worker2
+```bash
+kubectl delete all --all -n k2s-operator
+kubectl delete namespace k2s-operator
 ```
+
+If you want to tear your cluster down, run `kind delete cluster -n local`.
 
 ## Configuration Options
 
