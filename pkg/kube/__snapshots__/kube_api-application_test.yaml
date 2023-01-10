@@ -4,9 +4,8 @@ kind: Namespace
 metadata:
   creationTimestamp: null
   labels:
-    app.kubernetes.io/name: whoami
-    created-by: ""
-    version: "1.7.1"
+    k2s.techdecaf.io/name: whoami
+    k2s.techdecaf.io/created-by: "k2s-operator"
   name: whoami-v1
 spec: {}
 status: {}
