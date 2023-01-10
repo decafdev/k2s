@@ -30,6 +30,13 @@ After you deploy your service, you access it via local port 32080. Traefik is th
 
 ### Teardown
 
+If you want to delete the k2s-operator resources (better commands to come):
+
+```bash
+kubectl delete all --all -n k2s-operator
+kubectl delete namespace k2s-operator
+```
+
 If you want to tear your cluster down, run `kind delete cluster -n local`.
 
 ## Configuration Options
