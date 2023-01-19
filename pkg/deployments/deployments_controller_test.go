@@ -1,35 +1,46 @@
-package deployments_test
+package deployments
 
 import (
-	"net/http"
 	"testing"
+
+	"github.com/go-resty/resty/v2"
 )
 
 func TestDeploymentsController(t *testing.T) {
+	tests := make(map[string]func(t *testing.T, client *resty.Client))
 
-	// expected struct
-	type expected struct {
-		code int
-		body string
-	}
-	// given struct
-	type given struct {
-		method   string
-		endpoint string
-		body     string
-		expected expected
-	}
+	tests["create deployment and list deployments"] = testControllerCreateList
 
-	scenario := make(map[string]given)
+	setupControllerIntegrationTest()
 
-	scenario["when I want to list all k2s application deployments"] = given{
-		method:   http.MethodGet,
-		endpoint: "/deployments",
-		expected: expected{
-			code: http.StatusOK,
-			body: `[{}]`,
-		},
-	}
+	// for situation, fn := range tests {
+	// 	t.Run(situation, func(t *testing.T) {
+			
+	// 	})
+	// }
+
+	// type expected struct {
+	// 	code int
+	// 	body string
+	// }
+
+	// type given struct {
+	// 	method   string
+	// 	endpoint string
+	// 	// body     string
+	// 	expected expected
+	// }
+
+	// scenario := make(map[string]given)
+
+	// scenario["when I want to list all k2s application deployments"] = given{
+	// 	method:   http.MethodGet,
+	// 	endpoint: "/deployments",
+	// 	expected: expected{
+	// 		code: http.StatusOK,
+	// 		body: `[{}]`,
+	// 	},
+	// }
 
 	// for when, given := range scenario {
 	// 	t.Run(when, func(t *testing.T) {
@@ -46,4 +57,12 @@ func TestDeploymentsController(t *testing.T) {
 	// 		assert.Equal(t, given.expected.code, res.Code)
 	// 	})
 	// }
+}
+
+func setupControllerIntegrationTest() {
+
+}
+
+func testControllerCreateList(t *testing.T, client *resty.Client) {
+
 }
