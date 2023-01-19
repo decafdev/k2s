@@ -7,15 +7,15 @@ import (
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// NewDeploymentService function description
-func NewDeploymentService(k8s *kube.Service, log *logrus.Entry) *DeploymentService {
-	return &DeploymentService{k8s: k8s}
-}
-
 // DeploymentService struct
 type DeploymentService struct {
 	k8s *kube.Service
 	log *logrus.Entry
+}
+
+// NewDeploymentService function description
+func NewDeploymentService(k8s *kube.Service, log *logrus.Entry) *DeploymentService {
+	return &DeploymentService{k8s: k8s}
 }
 
 // CreateDeployment method
@@ -39,15 +39,6 @@ func (t *DeploymentService) CreateDeployment(spec *DeploymentDTO) error {
 	return application.Apply(t.k8s)
 
 	// return t.table.Create(spec)
-}
-
-// ListNamespaces method
-func (t *DeploymentService) ListNamespaces() ([]v1.Namespace, error) {
-
-	res, err := t.k8s.ListNamespaces(metaV1.ListOptions{
-		LabelSelector: kube.CreatedBySelector,
-	})
-	return res.Items, err
 }
 
 // ListDeployments method
@@ -117,6 +108,15 @@ func (t *DeploymentService) GetDeployment(name, version string) (DeploymentStatu
 	// }
 
 	return status, nil
+}
+
+// ListNamespaces method
+func (t *DeploymentService) ListNamespaces() ([]v1.Namespace, error) {
+
+	res, err := t.k8s.ListNamespaces(metaV1.ListOptions{
+		LabelSelector: kube.CreatedBySelector,
+	})
+	return res.Items, err
 }
 
 // DeleteDeployment method

@@ -7,6 +7,11 @@ import (
 	"github.com/techdecaf/k2s/v2/pkg/global"
 )
 
+// DeploymentController struct
+type DeploymentController struct {
+	deploy *DeploymentService
+}
+
 // NewDeploymentController function description
 func NewDeploymentController(app *gin.Engine, deploymentSvc *DeploymentService) *DeploymentController {
 	controller := &DeploymentController{deploy: deploymentSvc}
@@ -22,9 +27,29 @@ func NewDeploymentController(app *gin.Engine, deploymentSvc *DeploymentService) 
 	return controller
 }
 
-// DeploymentController struct
-type DeploymentController struct {
-	deploy *DeploymentService
+// @Summary list deployed services
+// @Description list deployed services
+// @Accept application/json
+// @Produce json
+// @Success 200 {object} map[string]string true
+// @Router /deployments [GET]
+// ListDeployments method
+func (t *DeploymentController) CreateDeployment(context *gin.Context) {
+	var deployment DeploymentDTO
+
+	if err := context.ShouldBind(&deployment); err != nil {
+		global.GinError(context, global.BadRequestError(err))
+		return
+	}
+
+	err := t.deploy.CreateDeployment(&deployment)
+	if err != nil {
+		t.deploy.log.Error(err)
+		global.GinError(context, global.InternalServerError(err))
+		return
+	}
+
+	context.JSON(http.StatusOK, nil)
 }
 
 // @Summary list deployed services
@@ -77,28 +102,3 @@ func (t *DeploymentController) GetDeployment(context *gin.Context) {
 // 	}
 // 	context.JSON(http.StatusAccepted, "success")
 // }
-
-// @Summary list deployed services
-// @Description list deployed services
-// @Accept application/json
-// @Produce json
-// @Success 200 {object} map[string]string true
-// @Router /deployments [GET]
-// ListDeployments method
-func (t *DeploymentController) CreateDeployment(context *gin.Context) {
-	var deployment DeploymentDTO
-
-	if err := context.ShouldBind(&deployment); err != nil {
-		global.GinError(context, global.BadRequestError(err))
-		return
-	}
-
-	err := t.deploy.CreateDeployment(&deployment)
-	if err != nil {
-		t.deploy.log.Error(err)
-		global.GinError(context, global.InternalServerError(err))
-		return
-	}
-
-	context.JSON(http.StatusOK, nil)
-}
